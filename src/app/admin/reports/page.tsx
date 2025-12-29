@@ -19,10 +19,10 @@ interface ReportData {
   overview: {
     totalBookings: number
     confirmedBookings: number
+    upcomingBookings: number
     pendingBookings: number
     cancelledBookings: number
     totalVisitors: number
-
   }
   trends: {
     bookingsByMonth: { month: string; count: number }[]
@@ -420,5 +420,6 @@ function AdminReportsPage() {
   )
 }
 export default AdminReportsPage
+
 
 
