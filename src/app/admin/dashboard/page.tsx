@@ -109,7 +109,7 @@ function AdminDashboardContent() {
   return (
     <>
       {/* Hero Section - matching homepage gradient */}
-      <section className="relative bg-gradient-to-br from-green-900/90 to-yellow-900/90 text-white overflow-hidden w-screen -ml-4 md:-ml-6 lg:-ml-8 mb-8">
+      <section className="relative bg-gradient-to-br from-green-900/90 to-yellow-900/90 text-white overflow-hidden w-screen -ml-[calc(50vw-50%)] mb-8">
         <div className="absolute inset-0 bg-[url('/images/hero.jpg')] bg-cover bg-center opacity-20"></div>
         
         <div className="container relative mx-auto px-4 py-16">
