@@ -1,0 +1,169 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { v2 as cloudinary } from 'cloudinary';
+import db from '@/lib/db';
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// GET: Fetch all media for a station
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const resolvedParams = await params;
+    const stationId = resolvedParams.id;
+
+    const [media] = await db.query<any[]>(
+      'SELECT * FROM station_media WHERE station_id = ? ORDER BY upload_date DESC',
+      [stationId]
+    );
+
+    return NextResponse.json({
+      success: true,
+      data: media,
+    });
+  } catch (error: any) {
+    console.error('Error fetching station media:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to fetch media',
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// POST: Upload new media for a station
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const resolvedParams = await params;
+    const stationId = resolvedParams.id;
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+    const mediaType = formData.get('media_type') as string;
+    const caption = formData.get('caption') as string;
+
+    if (!file) {
+      return NextResponse.json(
+        { success: false, message: 'No file provided' },
+        { status: 400 }
+      );
+    }
+
+    // Convert file to buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Upload to Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: `sewanagala-tours/station-${stationId}`,
+          resource_type: mediaType === 'video' ? 'video' : 'image',
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+
+      uploadStream.end(buffer);
+    });
+
+    const result = uploadResult as any;
+
+    // Save to database
+    const [insertResult] = await db.query<any>(
+      `INSERT INTO station_media (station_id, media_type, media_url, caption, cloudinary_public_id, upload_date) 
+       VALUES (?, ?, ?, ?, ?, NOW())`,
+      [stationId, mediaType, result.secure_url, caption || null, result.public_id]
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: 'Media uploaded successfully',
+      data: {
+        id: insertResult.insertId,
+        station_id: stationId,
+        media_type: mediaType,
+        media_url: result.secure_url,
+        caption: caption || null,
+        cloudinary_public_id: result.public_id,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error uploading media:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to upload media',
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE: Delete media from a station
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const mediaId = searchParams.get('mediaId');
+
+    if (!mediaId) {
+      return NextResponse.json(
+        { success: false, message: 'Media ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Get media details
+    const [media] = await db.query<any[]>(
+      'SELECT cloudinary_public_id FROM station_media WHERE id = ?',
+      [mediaId]
+    );
+
+    if (media.length === 0) {
+      return NextResponse.json(
+        { success: false, message: 'Media not found' },
+        { status: 404 }
+      );
+    }
+
+    // Delete from Cloudinary
+    if (media[0].cloudinary_public_id) {
+      await cloudinary.uploader.destroy(media[0].cloudinary_public_id);
+    }
+
+    // Delete from database
+    await db.query('DELETE FROM station_media WHERE id = ?', [mediaId]);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Media deleted successfully',
+    });
+  } catch (error: any) {
+    console.error('Error deleting media:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Failed to delete media',
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}

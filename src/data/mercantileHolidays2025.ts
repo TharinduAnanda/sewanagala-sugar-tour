@@ -1,0 +1,36 @@
+// Sri Lankan Mercantile Holidays for 2025
+export const mercantileHolidays2025 = [
+  { date: '2025-01-14', name: 'Tamil Thai Pongal Day' },
+  { date: '2025-02-04', name: 'Independence Day' },
+  { date: '2025-03-14', name: 'Maha Sivarathri Day' },
+  { date: '2025-04-11', name: 'Id-Ul-Fitr (Ramazan Festival Day)' },
+  { date: '2025-04-13', name: 'Day prior to Sinhala & Tamil New Year Day' },
+  { date: '2025-04-14', name: 'Sinhala & Tamil New Year Day' },
+  { date: '2025-04-18', name: 'Good Friday' },
+  { date: '2025-05-01', name: 'May Day' },
+  { date: '2025-05-12', name: 'Vesak Full Moon Poya Day' },
+  { date: '2025-05-13', name: 'Day following Vesak Full Moon Poya Day' },
+  { date: '2025-06-17', name: 'Id-Ul-Alha (Hajj Festival Day)' },
+  { date: '2025-06-18', name: 'Special Bank Holiday' },
+  { date: '2025-10-20', name: 'Deepavali Festival Day' },
+  { date: '2025-10-29', name: 'Milad-Un-Nabi (Holy Prophet\'s Birthday)' },
+  { date: '2025-12-25', name: 'Christmas Day' },
+]
+
+export const mercantileHolidays2026 = [
+  { date: '2026-01-14', name: 'Tamil Thai Pongal Day' },
+  { date: '2026-02-04', name: 'Independence Day' },
+  { date: '2026-03-03', name: 'Maha Sivarathri Day' },
+  { date: '2026-04-01', name: 'Id-Ul-Fitr (Ramazan Festival Day)' },
+  { date: '2026-04-03', name: 'Good Friday' },
+  { date: '2026-04-13', name: 'Day prior to Sinhala & Tamil New Year Day' },
+  { date: '2026-04-14', name: 'Sinhala & Tamil New Year Day' },
+  { date: '2026-05-01', name: 'May Day' },
+  { date: '2026-05-02', name: 'Vesak Full Moon Poya Day' },
+  { date: '2026-05-04', name: 'Day following Vesak Full Moon Poya Day' },
+  { date: '2026-06-07', name: 'Id-Ul-Alha (Hajj Festival Day)' },
+  { date: '2026-06-08', name: 'Special Bank Holiday' },
+  { date: '2026-10-08', name: 'Deepavali Festival Day' },
+  { date: '2026-10-18', name: 'Milad-Un-Nabi (Holy Prophet\'s Birthday)' },
+  { date: '2026-12-25', name: 'Christmas Day' },
+]

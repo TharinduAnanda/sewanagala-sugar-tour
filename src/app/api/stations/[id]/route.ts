@@ -1,0 +1,35 @@
+import { NextRequest, NextResponse } from 'next/server'
+import pool from '@/lib/db'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const resolvedParams = await params;
+    const [stations] = await pool.query(
+      'SELECT * FROM stations WHERE id = ? AND is_active = 1',
+      [resolvedParams.id]
+    )
+    
+    const stationsArray = stations as any[]
+    
+    if (stationsArray.length === 0) {
+      return NextResponse.json(
+        { success: false, message: 'Station not found' },
+        { status: 404 }
+      )
+    }
+    
+    return NextResponse.json({
+      success: true,
+      data: stationsArray[0]
+    })
+  } catch (error: any) {
+    console.error('Error fetching station:', error)
+    return NextResponse.json(
+      { success: false, message: 'Failed to fetch station' },
+      { status: 500 }
+    )
+  }
+}
