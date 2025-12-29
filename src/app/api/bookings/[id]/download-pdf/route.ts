@@ -4,10 +4,10 @@ import { generateBookingPDF } from '@/lib/pdfService'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const bookingId = params.id
+    const { id: bookingId } = await params
 
     // Fetch booking details from database
     const [bookings] = await pool.query(
@@ -42,7 +42,7 @@ export async function GET(
     const pdfBuffer = await generateBookingPDF(bookingData)
 
     // Return PDF as download
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfBuffer as any, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="Booking-${bookingId}.pdf"`,
