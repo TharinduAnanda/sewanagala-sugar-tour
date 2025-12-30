@@ -6,9 +6,6 @@ import { Card } from '@/components/ui/card'
 import dynamic from 'next/dynamic'
 
 const FullCalendar = dynamic(() => import('@fullcalendar/react'), { ssr: false })
-const dayGridPlugin = dynamic(() => import('@fullcalendar/daygrid'), { ssr: false })
-const timeGridPlugin = dynamic(() => import('@fullcalendar/timegrid'), { ssr: false })
-const interactionPlugin = dynamic(() => import('@fullcalendar/interaction'), { ssr: false })
 
 interface CalendarEvent {
   id: string

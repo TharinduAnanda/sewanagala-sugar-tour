@@ -105,7 +105,7 @@ export async function listMonthHolidays(
       
       if (ev.start?.date) {
         // All-day event
-        const days = expandAllDayRange(ev.start.date, ev.end?.date)
+        const days = expandAllDayRange(ev.start.date, ev.end?.date || undefined)
         for (const date of days) {
           holidays.push({ date, reason: summary })
         }

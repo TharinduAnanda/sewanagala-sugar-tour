@@ -49,7 +49,7 @@ export async function addHolidayEvent(
     if (existing.data.items && existing.data.items.length > 0) {
       return { 
         success: true, 
-        eventId: existing.data.items[0].id,
+        eventId: existing.data.items[0].id || undefined,
         error: 'Event already exists' 
       }
     }
@@ -71,7 +71,7 @@ export async function addHolidayEvent(
     
     return { 
       success: true, 
-      eventId: response.data.id 
+      eventId: response.data.id || undefined 
     }
   } catch (error: any) {
     console.error('Error adding holiday event:', error.message)
