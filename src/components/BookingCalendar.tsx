@@ -7,14 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FaChevronLeft, FaChevronRight, FaClock, FaLock, FaStar } from 'react-icons/fa'
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isBefore, startOfToday, getDay } from 'date-fns'
-
-interface TimeSlot {
-  id: number
-  date: string
-  time_slot: string
-  available_spots: number
-  max_capacity: number
-}
+import { TimeSlot } from '@/types/booking'
 
 interface ClosureLike {
   date: string // 'YYYY-MM-DD'
@@ -25,7 +18,7 @@ interface BookingCalendarProps {
   onDateSelect: (date: string) => void
   onSlotSelect: (slot: TimeSlot) => void
   selectedDate?: string
-  selectedSlot?: TimeSlot
+  selectedSlot?: TimeSlot | null
   closures?: ClosureLike[] // optional external closures (manual)
 }
 
@@ -257,3 +250,5 @@ export default function BookingCalendar({ onDateSelect, onSlotSelect, selectedDa
     </div>
   )
 }
+
+

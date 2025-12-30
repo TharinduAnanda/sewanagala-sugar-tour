@@ -12,14 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FaUser, FaPhone, FaEnvelope, FaUsers, FaCheckCircle, FaClock, FaMapMarkerAlt, FaInfoCircle, FaExclamationTriangle, FaClipboardList, FaDownload, FaCalendarCheck, FaCalendarAlt, FaStar, FaGift } from 'react-icons/fa'
 import { GiFactory, GiSugarCane } from 'react-icons/gi'
 import { MdEmail, MdPhone, MdLocationOn, MdAccessTime, MdPeople, MdCheck } from 'react-icons/md'
-
-interface TimeSlot {
-  id: string
-  date: string
-  time_slot: string
-  available_spots: number
-  max_capacity: number
-}
+import { TimeSlot } from '@/types/booking'
 
 export default function BookingPage() {
   const [formData, setFormData] = useState({
@@ -666,6 +659,7 @@ export default function BookingPage() {
     </div>
   )
 }
+
 
 
 
