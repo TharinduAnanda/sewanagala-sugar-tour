@@ -92,3 +92,5 @@ export async function testEmailConnection(): Promise<{ success: boolean; message
     return { success: false, message: 'Email server connection failed: ' + error.message }
   }
 }
+
+

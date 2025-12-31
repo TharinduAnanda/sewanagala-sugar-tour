@@ -6,6 +6,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { STATION_MAP_POSITIONS } from '@/lib/mapCoordinates'
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 export default function AdjustMapPosition() {
   const [offsetX, setOffsetX] = useState(0)
   const [offsetY, setOffsetY] = useState(0)

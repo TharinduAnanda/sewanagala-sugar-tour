@@ -338,3 +338,4 @@ export const BookingConfirmationEmail = ({
 
 export default BookingConfirmationEmail
 
+
