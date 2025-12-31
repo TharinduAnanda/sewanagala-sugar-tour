@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import axios from 'axios'
 
 const SRI_LANKAN_HOLIDAYS_CALENDAR_ID = "en.lk#holiday@group.v.calendar.google.com"

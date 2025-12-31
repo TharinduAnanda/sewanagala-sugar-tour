@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import db from '@/lib/db'
 
 // GET /api/calendar/closures?start=2024-12-01&end=2024-12-31
