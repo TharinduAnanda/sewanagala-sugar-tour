@@ -20,6 +20,14 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
   },
+  // Skip static generation of error pages
+  generateBuildId: async () => {
+    return 'build-' + Date.now();
+  },
+  // Disable static optimization for all pages
+  experimental: {
+    appDir: true,
+  },
 }
 
 module.exports = nextConfig
