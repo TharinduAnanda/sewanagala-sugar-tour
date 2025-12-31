@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState } from 'react'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
@@ -36,8 +38,8 @@ export default function AdjustMapPosition() {
                 className="w-full"
               />
               <div className="flex gap-2 mt-2">
-                <Button size="sm" onClick={() => setOffsetX(offsetX - 1)}>â† -1</Button>
-                <Button size="sm" onClick={() => setOffsetX(offsetX + 1)}>+1 â†’</Button>
+                <Button size="sm" onClick={() => setOffsetX(offsetX - 1)}>Ã¢â€ Â -1</Button>
+                <Button size="sm" onClick={() => setOffsetX(offsetX + 1)}>+1 Ã¢â€ â€™</Button>
                 <Button size="sm" variant="outline" onClick={() => setOffsetX(0)}>Reset</Button>
               </div>
             </div>
@@ -57,8 +59,8 @@ export default function AdjustMapPosition() {
                 className="w-full"
               />
               <div className="flex gap-2 mt-2">
-                <Button size="sm" onClick={() => setOffsetY(offsetY - 1)}>â†‘ -1</Button>
-                <Button size="sm" onClick={() => setOffsetY(offsetY + 1)}>+1 â†“</Button>
+                <Button size="sm" onClick={() => setOffsetY(offsetY - 1)}>Ã¢â€ â€˜ -1</Button>
+                <Button size="sm" onClick={() => setOffsetY(offsetY + 1)}>+1 Ã¢â€ â€œ</Button>
                 <Button size="sm" variant="outline" onClick={() => setOffsetY(0)}>Reset</Button>
               </div>
             </div>
