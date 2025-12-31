@@ -5,7 +5,9 @@ nixPkgs = ["nodejs_20", "npm-9_x"]
 cmds = ["npm install --legacy-peer-deps"]
 
 [phases.build]
-cmds = ["NODE_OPTIONS='--max-old-space-size=4096' npm run build"]
+cmds = ["npm run build"]
 
 [start]
 cmd = "npm start"
+
+# Force cache bust - v2
