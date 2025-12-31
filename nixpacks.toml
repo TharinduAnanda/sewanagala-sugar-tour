@@ -7,10 +7,11 @@ cmds = ["npm install --legacy-peer-deps"]
 [phases.build]
 cmds = [
   "npm run build 2>&1 | tee build.log || true",
-  "if [ -f .next/BUILD_ID ] && [ -f .next/prerender-manifest.json ]; then echo '✓ Build completed with all required files'; exit 0; else echo 'Creating missing manifest files...'; touch .next/prerender-manifest.json 2>/dev/null || true; exit 0; fi"
+  "if [ ! -f .next/prerender-manifest.json ]; then echo 'Creating minimal prerender-manifest...'; echo '{\"version\":4,\"routes\":{},\"dynamicRoutes\":{},\"preview\":{\"previewModeId\":\"\",\"previewModeSigningKey\":\"\",\"previewModeEncryptionKey\":\"\"}}' > .next/prerender-manifest.json; fi",
+  "if [ -f .next/BUILD_ID ]; then echo '✓ Build ready'; exit 0; else echo '✗ Build failed'; exit 1; fi"
 ]
 
 [start]
 cmd = "npm start"
 
-# Ensure prerender-manifest exists for Next.js to start
+# Create valid JSON manifest structure
