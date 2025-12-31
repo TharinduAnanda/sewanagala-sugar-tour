@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Image from 'next/image'
@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { STATION_MAP_POSITIONS } from '@/lib/mapCoordinates'
 
 // Force dynamic rendering for this page
-export const dynamic = 'force-dynamic'
 
 export default function AdjustMapPosition() {
   const [offsetX, setOffsetX] = useState(0)
@@ -37,8 +36,8 @@ export default function AdjustMapPosition() {
                 className="w-full"
               />
               <div className="flex gap-2 mt-2">
-                <Button size="sm" onClick={() => setOffsetX(offsetX - 1)}>← -1</Button>
-                <Button size="sm" onClick={() => setOffsetX(offsetX + 1)}>+1 →</Button>
+                <Button size="sm" onClick={() => setOffsetX(offsetX - 1)}>â† -1</Button>
+                <Button size="sm" onClick={() => setOffsetX(offsetX + 1)}>+1 â†’</Button>
                 <Button size="sm" variant="outline" onClick={() => setOffsetX(0)}>Reset</Button>
               </div>
             </div>
@@ -58,8 +57,8 @@ export default function AdjustMapPosition() {
                 className="w-full"
               />
               <div className="flex gap-2 mt-2">
-                <Button size="sm" onClick={() => setOffsetY(offsetY - 1)}>↑ -1</Button>
-                <Button size="sm" onClick={() => setOffsetY(offsetY + 1)}>+1 ↓</Button>
+                <Button size="sm" onClick={() => setOffsetY(offsetY - 1)}>â†‘ -1</Button>
+                <Button size="sm" onClick={() => setOffsetY(offsetY + 1)}>+1 â†“</Button>
                 <Button size="sm" variant="outline" onClick={() => setOffsetY(0)}>Reset</Button>
               </div>
             </div>

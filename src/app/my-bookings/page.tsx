@@ -1,7 +1,5 @@
-'use client'
+﻿'use client'
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -311,7 +309,7 @@ export default function MyBookingsPage() {
                     >
                       {loading ? (
                         <>
-                          <span className="animate-spin mr-2">⏳</span>
+                          <span className="animate-spin mr-2">â³</span>
                           Searching...
                         </>
                       ) : (
@@ -617,7 +615,7 @@ export default function MyBookingsPage() {
                       >
                         {loading ? (
                           <>
-                            <span className="animate-spin mr-2">⏳</span>
+                            <span className="animate-spin mr-2">â³</span>
                             Saving...
                           </>
                         ) : (
@@ -694,7 +692,7 @@ export default function MyBookingsPage() {
                       >
                         {loading ? (
                           <>
-                            <span className="animate-spin mr-2">⏳</span>
+                            <span className="animate-spin mr-2">â³</span>
                             Cancelling...
                           </>
                         ) : (

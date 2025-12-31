@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -16,8 +16,6 @@ import { Station } from '@/types'
 import { useTour } from '@/context/TourContext'
 import { FaMap, FaThLarge } from 'react-icons/fa'
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
 
 type ViewMode = 'map' | 'grid'
 
