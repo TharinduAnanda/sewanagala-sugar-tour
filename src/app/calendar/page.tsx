@@ -1,3 +1,5 @@
+'use client'
+
 import GoogleCalendarDisplay from "@/components/GoogleCalendarDisplay";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
