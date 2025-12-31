@@ -16,6 +16,9 @@ import { Station } from '@/types'
 import { useTour } from '@/context/TourContext'
 import { FaMap, FaThLarge } from 'react-icons/fa'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 type ViewMode = 'map' | 'grid'
 
 export default function TourPage() {

@@ -1,0 +1,54 @@
+========================================
+SEWANAGALA SUGAR TOUR - TUNNEL SETUP
+========================================
+
+SERVICES RUNNING:
+-----------------
+1. Next.js Server: Running in PowerShell Window 1
+   - Local URL: http://localhost:3000
+   - Port: 3000
+
+2. LocalTunnel: Running in PowerShell Window 2
+   - Check the PowerShell window for your public URL
+   - It will show: "your url is: https://XXXXX.loca.lt"
+
+HOW TO ACCESS:
+--------------
+1. Look at the LocalTunnel PowerShell window
+2. Find the URL that looks like: https://something-words.loca.lt
+3. Visit that URL in your browser
+4. When asked for "Tunnel Password", use: 212.104.231.78
+
+IMPORTANT NOTES:
+----------------
+- Keep BOTH PowerShell windows open (closing them stops the services)
+- The tunnel URL changes each time you restart
+- Password is your public IP: 212.104.231.78
+- Visitors only need to enter password once per 7 days
+
+TO STOP SERVICES:
+-----------------
+Close both PowerShell windows or press Ctrl+C in each window
+
+TO RESTART:
+-----------
+1. Open PowerShell in project folder
+2. Run: npm run dev
+3. Open another PowerShell in project folder  
+4. Run: npx localtunnel --port 3000
+5. Note the new URL from step 4
+
+TROUBLESHOOTING:
+----------------
+If you get 503 errors:
+- Make sure Next.js window shows "Ready"
+- Wait 10 seconds after starting both services
+- Refresh the browser page
+
+If password doesn't work:
+- Try exactly: 212.104.231.78 (no spaces)
+- Check if your IP changed: curl.exe https://loca.lt/mytunnelpassword
+
+========================================
+Created: December 31, 2025
+========================================

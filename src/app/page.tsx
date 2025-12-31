@@ -1,4 +1,7 @@
-'use client'
+﻿'use client'
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 
 import { motion } from 'framer-motion'
 import Header from '@/components/Header'
