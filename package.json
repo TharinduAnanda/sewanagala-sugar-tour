@@ -4,7 +4,7 @@
     "private":  true,
     "scripts":  {
                     "dev":  "next dev",
-                    "build":  "NEXT_PRIVATE_STANDALONE=true next build",
+                    "build":  "next build",
                     "start":  "next start",
                     "lint":  "next lint",
                     "postinstall":  "echo \u0027Dependencies installed with legacy peer deps\u0027"
@@ -44,7 +44,7 @@
                          "lucide-react":  "^0.562.0",
                          "multer":  "^2.0.2",
                          "mysql2":  "^3.15.3",
-                         "next":  "^15.1.0",
+                         "next":  "14.2.18",
                          "nodemailer":  "^7.0.11",
                          "pdfkit":  "^0.17.2",
                          "postcss":  "^8.4.33",
@@ -77,7 +77,7 @@
                             "@types/react":  "^18.2.48",
                             "@types/react-dom":  "^18.2.18",
                             "eslint":  "^8.56.0",
-                            "eslint-config-next":  "^15.1.0",
+                            "eslint-config-next":  "14.2.18",
                             "typescript":  "^5.3.3"
                         }
 }
