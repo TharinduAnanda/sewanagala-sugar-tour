@@ -1,0 +1,343 @@
+'use client'
+
+export const dynamic = 'force-dynamic'
+
+import { useEffect, useRef } from 'react'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import { Card, CardContent } from '@/components/ui/card'
+import { Factory, TrendingUp, Users, Award } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { FaArrowRight } from 'react-icons/fa'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import SugarcanePattern from '@/components/backgrounds/SugarcanePattern'
+import AboutSection from '@/components/sections/AboutSection'
+import OurStorySection from '@/components/sections/OurStorySection'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+export default function AboutPage() {
+  const heroRef = useRef<HTMLElement>(null)
+  const welcomeRef = useRef<HTMLDivElement>(null)
+  const processRef = useRef<HTMLDivElement>(null)
+  const valuesRef = useRef<HTMLDivElement>(null)
+  const ctaRef = useRef<HTMLElement>(null)
+
+  const values = [
+    {
+      icon: TrendingUp,
+      title: 'Economic Development',
+      description: 'We believe Sri Lanka has tremendous potential to develop its rural economy, eradicate poverty, and eliminate rural unemployment through sound agricultural policies and sustainable practices.',
+      gradient: 'from-green-500 to-emerald-600'
+    },
+    {
+      icon: Users,
+      title: 'People-Centered Approach',
+      description: 'Lanka Sugar Company Limited – Sevanagala (LSCLS) values every employee from bottom to top, appreciating constructive approaches and positive thinking that drive our success.',
+      gradient: 'from-blue-500 to-indigo-600'
+    },
+    {
+      icon: Award,
+      title: 'Dynamic Leadership',
+      description: 'Our leadership team thinks, plans, and acts with the prosperity of Sri Lanka\'s agrarian economy at the forefront of every decision.',
+      gradient: 'from-purple-500 to-pink-600'
+    }
+  ]
+
+  const processSteps = [
+    {
+      number: '01',
+      title: 'Fresh Cane Processing',
+      description: 'We process fresh, clean cane within 24 hours of harvesting to maximize sugar recovery'
+    },
+    {
+      number: '02',
+      title: 'Juice Extraction',
+      description: 'Our mill extracts juice efficiently using modern crushing technology'
+    },
+    {
+      number: '03',
+      title: 'First Crystallization',
+      description: 'Sugar crystals are recovered through first crystallization, producing natural brown sugar'
+    },
+    {
+      number: '04',
+      title: 'Quality Assurance',
+      description: 'Continuous improvement and modern processing techniques ensure industry-leading standards'
+    }
+  ]
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero section animations
+      gsap.from(heroRef.current?.querySelectorAll('h1, p') || [], {
+        y: 50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'power3.out'
+      })
+
+      // Welcome card
+      gsap.from(welcomeRef.current, {
+        scale: 0.9,
+        opacity: 0,
+        y: 50,
+        duration: 1,
+        ease: 'back.out(1.5)',
+        scrollTrigger: {
+          trigger: welcomeRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Process steps with stagger
+      const processCards = processRef.current?.children || []
+      gsap.from(processCards, {
+        y: 60,
+        opacity: 0,
+        scale: 0.8,
+        rotation: -10,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'back.out(1.7)',
+        scrollTrigger: {
+          trigger: processRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Values cards with flip
+      const valueCards = valuesRef.current?.children || []
+      gsap.from(valueCards, {
+        y: 80,
+        opacity: 0,
+        rotationY: -90,
+        transformPerspective: 1000,
+        duration: 1,
+        stagger: 0.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: valuesRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // CTA section
+      gsap.from(ctaRef.current?.children || [], {
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: ctaRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+    })
+
+    return () => ctx.revert()
+  }, [])
+
+  const handleCardHover = (e: React.MouseEvent) => {
+    const icon = e.currentTarget.querySelector('.value-icon')
+    const iconBg = e.currentTarget.querySelector('.value-icon-bg')
+    
+    gsap.to(e.currentTarget, {
+      y: -10,
+      scale: 1.03,
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 360,
+      scale: 1.2,
+      duration: 0.6,
+      ease: 'elastic.out(1, 0.5)'
+    })
+
+    gsap.to(icon, {
+      scale: 1.1,
+      duration: 0.3,
+      ease: 'back.out(2)'
+    })
+  }
+
+  const handleCardHoverOut = (e: React.MouseEvent) => {
+    const icon = e.currentTarget.querySelector('.value-icon')
+    const iconBg = e.currentTarget.querySelector('.value-icon-bg')
+    
+    gsap.to(e.currentTarget, {
+      y: 0,
+      scale: 1,
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(icon, {
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      
+      <main className="flex-1">
+        <AboutSection />
+        <OurStorySection />
+        {/* Hero Section */}
+        <section ref={heroRef} className="relative py-20 md:py-32 bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 text-white overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <SugarcanePattern />
+          </div>
+          
+          <div className="container relative mx-auto px-4">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">About Us</h1>
+              <p className="text-xl md:text-2xl mb-4 max-w-3xl mx-auto">
+                Sevanagala Sugar Factory
+              </p>
+              <p className="text-lg md:text-xl text-green-200 max-w-2xl mx-auto">
+                Producing Best Quality Natural Brown Sugar Since 1986
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Welcome Section */}
+        <section className="py-16 md:py-24 bg-white">
+          <div className="container mx-auto px-4">
+            <div ref={welcomeRef} className="max-w-5xl mx-auto">
+              <Card className="border-2 border-green-200 shadow-2xl">
+                <CardContent className="p-8 md:p-12">
+                  <div className="flex items-center justify-center mb-6">
+                    <Factory className="w-12 h-12 text-green-600 mr-4" />
+                    <h2 className="text-3xl md:text-4xl font-bold text-green-900">Welcome to Sevanagala Sugar Factory</h2>
+                  </div>
+                  <p className="text-lg text-gray-700 leading-relaxed text-center">
+                    Located in the heart of the Moneragala District in Uva Province, approximately 155 km east of Colombo, 
+                    Sevanagala Sugar Factory stands as a cornerstone of Sri Lanka's sugar industry and a vital contributor 
+                    to the nation's agrarian economy.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Production Process */}
+        <section className="py-16 md:py-24 bg-gradient-to-b from-green-50 to-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-green-900">Our Production Process</h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Quality begins in the field. Our factory's performance is measured by overall recovery from available 
+                sugar in the cane, and we maintain industry-leading standards.
+              </p>
+              <div className="w-24 h-1 bg-green-600 mx-auto mt-4"></div>
+            </div>
+
+            <div ref={processRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {processSteps.map((step, index) => (
+                <Card key={step.number} className="h-full border-2 border-green-100 shadow-lg cursor-pointer hover:shadow-2xl transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="text-6xl font-bold text-green-600/20 mb-4">
+                      {step.number}
+                    </div>
+                    <h3 className="text-xl font-bold text-green-900 mb-3">{step.title}</h3>
+                    <p className="text-gray-600 leading-relaxed">{step.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Vision & Values */}
+        <section className="py-16 md:py-24 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-green-900">Our Vision & Values</h2>
+              <div className="w-24 h-1 bg-green-600 mx-auto"></div>
+            </div>
+
+            <div ref={valuesRef} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {values.map((value, index) => (
+                <div
+                  key={value.title}
+                  onMouseEnter={handleCardHover}
+                  onMouseLeave={handleCardHoverOut}
+                  className="cursor-pointer"
+                >
+                  <Card className="h-full border-2 border-green-100 shadow-lg">
+                    <CardContent className="p-8">
+                      <div 
+                        className={`value-icon-bg w-20 h-20 rounded-full bg-gradient-to-br ${value.gradient} flex items-center justify-center mx-auto mb-6`}
+                      >
+                        <value.icon className="value-icon w-10 h-10 text-white" />
+                      </div>
+                      
+                      <h3 className="text-2xl font-bold text-green-900 mb-4 text-center">{value.title}</h3>
+                      <p className="text-gray-700 leading-relaxed text-center">{value.description}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section ref={ctaRef} className="py-16 md:py-24 bg-gradient-to-br from-green-700 via-green-600 to-emerald-600">
+          <div className="container mx-auto px-4">
+            <div className="text-center text-white">
+              <h2 className="text-3xl md:text-5xl font-bold mb-6">Experience Our Factory Tour</h2>
+              <p className="text-xl mb-8 max-w-3xl mx-auto">
+                See firsthand how sugar is made. Our guided tours provide an educational and engaging 
+                experience for visitors of all ages.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/tour">
+                  <Button size="lg" className="w-full sm:w-auto bg-white text-green-900 hover:bg-gray-100">
+                    Start Virtual Tour
+                    <FaArrowRight className="ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/booking">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent text-white border-white hover:bg-white/10">
+                    Book Physical Tour
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      
+      <Footer />
+    </div>
+  )
+}

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { TourProvider } from '@/context/TourContext'
+import CustomCursor from '@/components/CustomCursor'
 
 // Force all pages to be dynamic
 export const dynamic = 'force-dynamic'
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body className={inter.className} suppressHydrationWarning>
+        <CustomCursor />
         <TourProvider>
           {children}
         </TourProvider>

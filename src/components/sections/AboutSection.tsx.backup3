@@ -1,0 +1,358 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import Image from 'next/image'
+import { Card, CardContent } from '@/components/ui/card'
+import { Factory, Calendar, Users, Leaf } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { animations, timings, easings, staggers, createScrollAnimation } from '@/lib/animations'
+import GearsSilhouette from '@/components/svgs/GearsSilhouette'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+export default function AboutSection() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  const subtitleRef = useRef<HTMLParagraphElement>(null)
+  const imageRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const statsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Title animation
+      if (titleRef.current) {
+        createScrollAnimation(
+          titleRef.current,
+          animations.fadeInUp,
+          titleRef.current
+        )
+      }
+
+      // Subtitle
+      if (subtitleRef.current) {
+        createScrollAnimation(
+          subtitleRef.current,
+          animations.fadeInUpSubtle,
+          subtitleRef.current,
+          { delay: 0.1 }
+        )
+      }
+
+      // Decorative line
+      const decorativeLine = document.querySelector('.about-decorative-line')
+      if (decorativeLine) {
+        gsap.fromTo(decorativeLine, 
+          { width: 0, opacity: 0 },
+          {
+            width: '6rem',
+            opacity: 1,
+            duration: timings.standard,
+            ease: easings.smooth,
+            scrollTrigger: {
+              trigger: decorativeLine,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          }
+        )
+      }
+
+      // Image reveal with parallax
+      if (imageRef.current) {
+        createScrollAnimation(
+          imageRef.current,
+          animations.imageReveal,
+          imageRef.current
+        )
+
+        // Parallax effect on image
+        gsap.to(imageRef.current, {
+          y: -30,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.5
+          }
+        })
+      }
+
+      // Main card
+      if (cardRef.current) {
+        createScrollAnimation(
+          cardRef.current,
+          animations.scaleUp,
+          cardRef.current,
+          { delay: 0.2 }
+        )
+      }
+
+      // Stats cards with smooth stagger
+      if (statsRef.current) {
+        const statCards = Array.from(statsRef.current.children)
+        
+        if (statCards.length > 0) {
+          gsap.fromTo(statCards,
+            { y: 50, opacity: 0, scale: 0.95 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: timings.standard,
+              stagger: staggers.normal,
+              ease: easings.smooth,
+              scrollTrigger: {
+                trigger: statsRef.current,
+                start: 'top 85%',
+                toggleActions: 'play none none none'
+              }
+            }
+          )
+
+          // Animate icons separately
+          statCards.forEach((card) => {
+            const icon = card.querySelector('.stat-icon')
+            if (icon) {
+              gsap.fromTo(icon,
+                { scale: 0.5, opacity: 0, rotation: -15 },
+                {
+                  scale: 1,
+                  opacity: 1,
+                  rotation: 0,
+                  duration: timings.standard,
+                  ease: easings.smooth,
+                  scrollTrigger: {
+                    trigger: card,
+                    start: 'top 90%',
+                    toggleActions: 'play none none none'
+                  }
+                }
+              )
+            }
+          })
+        }
+      }
+
+      // Background silhouette animation
+      const bgSvg = document.querySelector('.gears-bg-svg')
+      if (bgSvg && sectionRef.current) {
+        gsap.fromTo(bgSvg,
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: 2,
+            ease: easings.subtle,
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 80%',
+              toggleActions: 'play none none none'
+            }
+          }
+        )
+      }
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  const handleCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
+    const icon = e.currentTarget.querySelector('.stat-icon')
+    
+    gsap.to(e.currentTarget, {
+      y: -8,
+      scale: 1.05,
+      duration: timings.fast,
+      ease: easings.smooth
+    })
+    
+    if (icon) {
+      gsap.to(icon, {
+        scale: 1.1,
+        rotation: 5,
+        duration: timings.fast,
+        ease: easings.smooth
+      })
+    }
+  }
+
+  const handleCardHoverOut = (e: React.MouseEvent<HTMLDivElement>) => {
+    const icon = e.currentTarget.querySelector('.stat-icon')
+    
+    gsap.to(e.currentTarget, {
+      y: 0,
+      scale: 1,
+      duration: timings.fast,
+      ease: easings.smooth
+    })
+    
+    if (icon) {
+      gsap.to(icon, {
+        scale: 1,
+        rotation: 0,
+        duration: timings.fast,
+        ease: easings.smooth
+      })
+    }
+  }
+
+  return (
+    <section ref={sectionRef} className="relative py-20 md:py-32 bg-gradient-to-b from-white via-green-50/30 to-white overflow-hidden">
+      {/* Gears Silhouette Full Background */}
+      <div className="gears-bg-svg absolute inset-0 pointer-events-none opacity-0">
+        <GearsSilhouette className="w-full h-full text-green-900" />
+      </div>
+      
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h2 ref={titleRef} className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-green-900">
+            About Sevanagala Sugar Factory
+          </h2>
+          <p ref={subtitleRef} className="text-xl md:text-2xl lg:text-3xl text-green-700 font-medium mb-4">
+            Sri Lanka's Sugar Bowl Since 1986
+          </p>
+          <div className="about-decorative-line h-1 bg-gradient-to-r from-transparent via-green-600 to-transparent mx-auto"></div>
+        </div>
+
+        {/* Image and Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-16 items-center">
+          {/* Image */}
+          <div ref={imageRef} className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+            <Image
+              src="/images/sections/sugarcane-field.jpg"
+              alt="Sugarcane fields at Sevanagala"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-green-900/40 to-transparent"></div>
+          </div>
+
+          {/* Content Card */}
+          <div ref={cardRef}>
+            <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-8 md:p-10">
+                <h3 className="text-3xl md:text-4xl font-bold mb-6 text-green-900">
+                  Welcome to Sevanagala Sugar Factory
+                </h3>
+                <div className="space-y-4 text-gray-700 text-lg leading-relaxed">
+                  <p>
+                    Located in the heart of the <strong>Moneragala District</strong> in Uva Province, 
+                    approximately <strong>155 km east of Colombo</strong>, Sevanagala Sugar Factory stands as a 
+                    cornerstone of Sri Lanka's sugar industry.
+                  </p>
+                  <p>
+                    The region was identified as ideal for sugarcane cultivation in 1980, transforming 
+                    Sevanagala from a remote rural village into a thriving agricultural community built 
+                    on harmony and prosperity.
+                  </p>
+                  <p className="text-green-800 font-semibold">
+                    We are a vital contributor to the nation's agrarian economy, supporting thousands of 
+                    farming families and producing the finest quality natural brown sugar.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Stats Grid - HEXAGONAL CARDS */}
+        <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+          <div
+            onMouseEnter={handleCardHover}
+            onMouseLeave={handleCardHoverOut}
+            className="cursor-pointer group relative"
+          >
+            {/* Hexagon shape using clip-path */}
+            <div 
+              className="relative h-full backdrop-blur-md border-2 border-green-100 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white to-green-50/30"
+              style={{
+                clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+                padding: '3rem 2rem'
+              }}
+            >
+              <div className="flex flex-col items-center justify-center h-full min-h-[220px] text-center">
+                <div className="stat-icon w-14 h-14 mb-3 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg">
+                  <Factory className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold text-green-900 mb-1">1,250</h3>
+                <p className="text-gray-600 text-sm">TCD Capacity</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            onMouseEnter={handleCardHover}
+            onMouseLeave={handleCardHoverOut}
+            className="cursor-pointer group relative"
+          >
+            <div 
+              className="relative h-full backdrop-blur-md border-2 border-green-100 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white to-green-50/30"
+              style={{
+                clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+                padding: '3rem 2rem'
+              }}
+            >
+              <div className="flex flex-col items-center justify-center h-full min-h-[220px] text-center">
+                <div className="stat-icon w-14 h-14 mb-3 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+                  <Calendar className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold text-green-900 mb-1">38+</h3>
+                <p className="text-gray-600 text-sm">Years Strong</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            onMouseEnter={handleCardHover}
+            onMouseLeave={handleCardHoverOut}
+            className="cursor-pointer group relative"
+          >
+            <div 
+              className="relative h-full backdrop-blur-md border-2 border-green-100 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white to-green-50/30"
+              style={{
+                clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+                padding: '3rem 2rem'
+              }}
+            >
+              <div className="flex flex-col items-center justify-center h-full min-h-[220px] text-center">
+                <div className="stat-icon w-14 h-14 mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold text-green-900 mb-1">25,000+</h3>
+                <p className="text-gray-600 text-sm">Families</p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            onMouseEnter={handleCardHover}
+            onMouseLeave={handleCardHoverOut}
+            className="cursor-pointer group relative"
+          >
+            <div 
+              className="relative h-full backdrop-blur-md border-2 border-green-100 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-white to-green-50/30"
+              style={{
+                clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+                padding: '3rem 2rem'
+              }}
+            >
+              <div className="flex flex-col items-center justify-center h-full min-h-[220px] text-center">
+                <div className="stat-icon w-14 h-14 mb-3 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                  <Leaf className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold text-green-900 mb-1">100%</h3>
+                <p className="text-gray-600 text-sm">Natural</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

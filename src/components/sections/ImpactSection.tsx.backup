@@ -1,0 +1,267 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Briefcase, Building2, Wheat, Home, Zap } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+export default function ImpactSection() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const titleRef = useRef<HTMLDivElement>(null)
+  const cardsRef = useRef<HTMLDivElement>(null)
+  const commitmentRef = useRef<HTMLDivElement>(null)
+
+  const impacts = [
+    {
+      icon: Briefcase,
+      title: 'Employment',
+      description: 'Providing jobs for permanent, casual, and seasonal workers throughout the year',
+      gradient: 'from-blue-500 to-indigo-600'
+    },
+    {
+      icon: Building2,
+      title: 'Rural Development',
+      description: 'Transforming Sevanagala from a dismissed village to a thriving agricultural hub',
+      gradient: 'from-green-500 to-emerald-600'
+    },
+    {
+      icon: Wheat,
+      title: 'Food Security',
+      description: 'Contributing to Sri Lanka\'s domestic sugar production and reducing import dependency',
+      gradient: 'from-amber-500 to-orange-600'
+    },
+    {
+      icon: Home,
+      title: 'Community Building',
+      description: 'Creating a peaceful, harmonious community where families live with dignity and purpose',
+      gradient: 'from-purple-500 to-pink-600'
+    },
+    {
+      icon: Zap,
+      title: 'Sustainable Energy',
+      description: 'Generating power from our operations to support environmental goals',
+      gradient: 'from-yellow-500 to-red-600'
+    }
+  ]
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Title animation
+      gsap.from(titleRef.current?.children || [], {
+        y: 50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: titleRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Impact cards with morphing effect
+      const impactCards = cardsRef.current?.children || []
+      
+      gsap.from(impactCards, {
+        y: 80,
+        opacity: 0,
+        scale: 0.5,
+        rotation: -25,
+        duration: 1,
+        stagger: 0.15,
+        ease: 'back.out(1.7)',
+        scrollTrigger: {
+          trigger: cardsRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Animate icons with bounce
+      Array.from(impactCards).forEach((card, index) => {
+        const iconBg = card.querySelector('.impact-icon-bg')
+        const icon = card.querySelector('.impact-icon')
+        
+        if (iconBg && icon) {
+          gsap.from(iconBg, {
+            scale: 0,
+            rotation: 360,
+            duration: 0.8,
+            delay: index * 0.15 + 0.3,
+            ease: 'elastic.out(1, 0.5)',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          })
+
+          gsap.from(icon, {
+            scale: 0,
+            rotation: -360,
+            duration: 0.6,
+            delay: index * 0.15 + 0.5,
+            ease: 'back.out(2)',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          })
+        }
+      })
+
+      // Commitment card with perspective
+      gsap.from(commitmentRef.current, {
+        scale: 0.8,
+        opacity: 0,
+        rotationX: 30,
+        transformPerspective: 1000,
+        duration: 1.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: commitmentRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Animate text inside commitment card
+      const commitmentText = commitmentRef.current?.querySelectorAll('h3, p') || []
+      gsap.from(commitmentText, {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        delay: 0.5,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: commitmentRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  const handleCardHover = (e: React.MouseEvent) => {
+    const icon = e.currentTarget.querySelector('.impact-icon')
+    const iconBg = e.currentTarget.querySelector('.impact-icon-bg')
+    
+    gsap.to(e.currentTarget, {
+      y: -15,
+      scale: 1.05,
+      boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.3)',
+      duration: 0.4,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 180,
+      scale: 1.2,
+      duration: 0.5,
+      ease: 'power2.out'
+    })
+
+    gsap.to(icon, {
+      y: -5,
+      scale: 1.15,
+      rotation: 10,
+      duration: 0.3,
+      ease: 'back.out(1.7)'
+    })
+  }
+
+  const handleCardHoverOut = (e: React.MouseEvent) => {
+    const icon = e.currentTarget.querySelector('.impact-icon')
+    const iconBg = e.currentTarget.querySelector('.impact-icon-bg')
+    
+    gsap.to(e.currentTarget, {
+      y: 0,
+      scale: 1,
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      duration: 0.4,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(icon, {
+      y: 0,
+      scale: 1,
+      rotation: 0,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+  }
+
+  return (
+    <section ref={sectionRef} className="py-16 md:py-24 bg-gradient-to-b from-white to-green-50">
+      <div className="container mx-auto px-4">
+        <div ref={titleRef} className="text-center mb-12">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 text-green-900">Our Impact</h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Our factory represents more than sugar production—it embodies the transformation of rural Sri Lanka, 
+            the empowerment of farming families, and the pursuit of agricultural self-sufficiency for our nation.
+          </p>
+          <div className="w-24 h-1 bg-green-600 mx-auto mt-4"></div>
+        </div>
+
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {impacts.map((impact, index) => (
+            <div
+              key={impact.title}
+              onMouseEnter={handleCardHover}
+              onMouseLeave={handleCardHoverOut}
+              className={`cursor-pointer ${index === impacts.length - 1 && impacts.length % 3 === 1 ? 'lg:col-span-3 lg:max-w-md lg:mx-auto' : ''}`}
+            >
+              <Card className="h-full border-2 border-green-100 shadow-lg">
+                <CardContent className="p-6">
+                  <div 
+                    className={`impact-icon-bg w-16 h-16 rounded-xl bg-gradient-to-br ${impact.gradient} flex items-center justify-center mb-4`}
+                  >
+                    <impact.icon className="impact-icon w-8 h-8 text-white" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-green-900 mb-3">{impact.title}</h3>
+                  <p className="text-gray-700 leading-relaxed">{impact.description}</p>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
+
+        <div ref={commitmentRef}>
+          <Card className="bg-gradient-to-br from-green-700 via-green-600 to-emerald-600 text-white border-0 shadow-2xl">
+            <CardContent className="p-8 md:p-12">
+              <h3 className="text-2xl md:text-4xl font-bold mb-4 text-center">
+                Commitment to Excellence
+              </h3>
+              <p className="text-lg text-center leading-relaxed max-w-4xl mx-auto">
+                Operating under Lanka Sugar Company (Pvt) Ltd, a fully government-owned company managed by the 
+                Ministry of Industry and Entrepreneurship Development, we maintain the highest standards of 
+                quality, sustainability, and community responsibility.
+              </p>
+              <div className="mt-8 text-center">
+                <p className="text-3xl md:text-4xl font-bold mb-2">Sweetening Sri Lanka's Future Since 1986</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </section>
+  )
+}

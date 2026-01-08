@@ -1,0 +1,270 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Factory, Calendar, Users, Leaf } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import FactoryPattern from '../backgrounds/FactoryPattern'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+export default function AboutSection() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  const subtitleRef = useRef<HTMLParagraphElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const statsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Title animation with split text
+      if (titleRef.current) {
+        gsap.from(titleRef.current, {
+          y: 50,
+          opacity: 0,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: titleRef.current,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        })
+      }
+
+      // Subtitle with delay
+      gsap.from(subtitleRef.current, {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        delay: 0.2,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: subtitleRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Decorative line grow
+      gsap.from('.decorative-line', {
+        width: 0,
+        duration: 0.8,
+        delay: 0.4,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.decorative-line',
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Main card with scale and rotate
+      gsap.from(cardRef.current, {
+        scale: 0.8,
+        opacity: 0,
+        rotationY: -30,
+        duration: 1,
+        ease: 'back.out(1.7)',
+        scrollTrigger: {
+          trigger: cardRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Stats cards stagger with flip
+      const statCards = statsRef.current?.children || []
+      gsap.from(statCards, {
+        y: 60,
+        opacity: 0,
+        rotationX: -90,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: statsRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Icon rotation animation on each card
+      Array.from(statCards).forEach((card) => {
+        const icon = card.querySelector('.stat-icon')
+        if (icon) {
+          gsap.from(icon, {
+            rotation: 360,
+            duration: 1,
+            ease: 'elastic.out(1, 0.5)',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          })
+        }
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  const handleCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
+    const icon = e.currentTarget.querySelector('.stat-icon')
+    const number = e.currentTarget.querySelector('.stat-number')
+    
+    gsap.to(e.currentTarget, {
+      y: -10,
+      scale: 1.05,
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+    
+    gsap.to(icon, {
+      rotation: 360,
+      scale: 1.2,
+      duration: 0.5,
+      ease: 'elastic.out(1, 0.5)'
+    })
+
+    gsap.to(number, {
+      scale: 1.1,
+      duration: 0.3,
+      ease: 'back.out(1.7)'
+    })
+  }
+
+  const handleCardHoverOut = (e: React.MouseEvent<HTMLDivElement>) => {
+    const icon = e.currentTarget.querySelector('.stat-icon')
+    const number = e.currentTarget.querySelector('.stat-number')
+    
+    gsap.to(e.currentTarget, {
+      y: 0,
+      scale: 1,
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+    
+    gsap.to(icon, {
+      rotation: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(number, {
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+  }
+
+  return (
+    <section ref={sectionRef} className="relative py-16 md:py-24 bg-gradient-to-b from-white to-green-50 overflow-hidden">
+      <FactoryPattern />
+      
+      <div className="container relative z-10 mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 ref={titleRef} className="text-3xl md:text-5xl font-bold mb-4">
+            Sevanagala Sugar Factory
+          </h2>
+          <p ref={subtitleRef} className="text-xl md:text-2xl text-green-800 font-semibold mb-2">
+            Producing Best Quality Natural Brown Sugar Since 1986
+          </p>
+          <div className="decorative-line w-24 h-1 bg-green-600 mx-auto mt-4"></div>
+        </div>
+
+        <div ref={cardRef} className="max-w-4xl mx-auto mb-16">
+          <Card className="border-2 border-green-100 shadow-xl">
+            <CardContent className="p-8">
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 text-green-900">
+                Welcome to Sevanagala Sugar Factory
+              </h3>
+              <p className="text-lg text-gray-700 leading-relaxed">
+                Located in the heart of the Moneragala District in Uva Province, approximately 155 km east of Colombo, 
+                Sevanagala Sugar Factory stands as a cornerstone of Sri Lanka's sugar industry and a vital contributor 
+                to the nation's agrarian economy.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div ref={statsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div
+            onMouseEnter={handleCardHover}
+            onMouseLeave={handleCardHoverOut}
+            className="cursor-pointer"
+          >
+            <Card className="h-full border-green-200 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="stat-icon">
+                  <Factory className="w-16 h-16 mx-auto mb-4 text-green-600" />
+                </div>
+                <h3 className="stat-number text-4xl font-bold text-green-900 mb-2">1,250</h3>
+                <p className="text-gray-600 font-semibold">TCD Capacity</p>
+                <p className="text-sm text-gray-500 mt-2">Tons of Cane Crushed Daily</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div
+            onMouseEnter={handleCardHover}
+            onMouseLeave={handleCardHoverOut}
+            className="cursor-pointer"
+          >
+            <Card className="h-full border-green-200 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="stat-icon">
+                  <Calendar className="w-16 h-16 mx-auto mb-4 text-green-600" />
+                </div>
+                <h3 className="stat-number text-4xl font-bold text-green-900 mb-2">1986</h3>
+                <p className="text-gray-600 font-semibold">Established</p>
+                <p className="text-sm text-gray-500 mt-2">Years of Excellence</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div
+            onMouseEnter={handleCardHover}
+            onMouseLeave={handleCardHoverOut}
+            className="cursor-pointer"
+          >
+            <Card className="h-full border-green-200 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="stat-icon">
+                  <Users className="w-16 h-16 mx-auto mb-4 text-green-600" />
+                </div>
+                <h3 className="stat-number text-4xl font-bold text-green-900 mb-2">25,000+</h3>
+                <p className="text-gray-600 font-semibold">Families Supported</p>
+                <p className="text-sm text-gray-500 mt-2">Direct & Indirect Impact</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div
+            onMouseEnter={handleCardHover}
+            onMouseLeave={handleCardHoverOut}
+            className="cursor-pointer"
+          >
+            <Card className="h-full border-green-200 shadow-lg">
+              <CardContent className="p-6 text-center">
+                <div className="stat-icon">
+                  <Leaf className="w-16 h-16 mx-auto mb-4 text-green-600" />
+                </div>
+                <h3 className="stat-number text-4xl font-bold text-green-900 mb-2">4,215</h3>
+                <p className="text-gray-600 font-semibold">Hectares</p>
+                <p className="text-sm text-gray-500 mt-2">Cultivable Land</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

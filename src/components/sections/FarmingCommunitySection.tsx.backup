@@ -1,0 +1,237 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Users, HandHeart, Sprout, DollarSign } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+export default function FarmingCommunitySection() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const titleRef = useRef<HTMLDivElement>(null)
+  const bannerRef = useRef<HTMLDivElement>(null)
+  const cardsRef = useRef<HTMLDivElement>(null)
+
+  const supports = [
+    {
+      icon: Users,
+      title: 'Extension Services',
+      description: 'A dedicated outgrower section with expert agricultural officers provides technical guidance and support',
+      gradient: 'from-blue-500 to-indigo-600'
+    },
+    {
+      icon: DollarSign,
+      title: 'Financial Assistance',
+      description: 'Competitive financing options to help farmers succeed with fair compensation',
+      gradient: 'from-green-500 to-emerald-600'
+    },
+    {
+      icon: Sprout,
+      title: 'Input Supply',
+      description: 'Fertilizer, seed cane, and herbicides provided at affordable prices',
+      gradient: 'from-amber-500 to-orange-600'
+    },
+    {
+      icon: HandHeart,
+      title: 'Fair Compensation',
+      description: 'Average of Rs. 10 million paid to outgrower farmers weekly during operating months',
+      gradient: 'from-rose-500 to-pink-600'
+    }
+  ]
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Title animation
+      gsap.from(titleRef.current?.children || [], {
+        y: 50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: titleRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Banner card with pulsing effect
+      gsap.from(bannerRef.current, {
+        scale: 0.85,
+        opacity: 0,
+        y: 50,
+        duration: 1,
+        ease: 'back.out(1.5)',
+        scrollTrigger: {
+          trigger: bannerRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Support cards with circular motion
+      const supportCards = cardsRef.current?.children || []
+      
+      gsap.from(supportCards, {
+        scale: 0,
+        opacity: 0,
+        rotation: 180,
+        duration: 0.8,
+        stagger: {
+          each: 0.15,
+          from: 'center'
+        },
+        ease: 'back.out(2)',
+        scrollTrigger: {
+          trigger: cardsRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Animate circular icon backgrounds
+      Array.from(supportCards).forEach((card, index) => {
+        const iconBg = card.querySelector('.support-icon-bg')
+        const icon = card.querySelector('.support-icon')
+        
+        if (iconBg && icon) {
+          gsap.from(iconBg, {
+            scale: 0,
+            rotation: -360,
+            duration: 1,
+            delay: index * 0.15 + 0.3,
+            ease: 'elastic.out(1, 0.5)',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          })
+
+          gsap.from(icon, {
+            scale: 0,
+            rotation: 360,
+            duration: 0.8,
+            delay: index * 0.15 + 0.5,
+            ease: 'back.out(2.5)',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          })
+        }
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  const handleCardHover = (e: React.MouseEvent) => {
+    const icon = e.currentTarget.querySelector('.support-icon')
+    const iconBg = e.currentTarget.querySelector('.support-icon-bg')
+    
+    gsap.to(e.currentTarget, {
+      y: -12,
+      scale: 1.05,
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 360,
+      scale: 1.25,
+      duration: 0.6,
+      ease: 'elastic.out(1, 0.5)'
+    })
+
+    gsap.to(icon, {
+      scale: 1.2,
+      y: -5,
+      duration: 0.3,
+      ease: 'back.out(2)'
+    })
+  }
+
+  const handleCardHoverOut = (e: React.MouseEvent) => {
+    const icon = e.currentTarget.querySelector('.support-icon')
+    const iconBg = e.currentTarget.querySelector('.support-icon-bg')
+    
+    gsap.to(e.currentTarget, {
+      y: 0,
+      scale: 1,
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(icon, {
+      scale: 1,
+      y: 0,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+  }
+
+  return (
+    <section ref={sectionRef} className="py-16 md:py-24 bg-white">
+      <div className="container mx-auto px-4">
+        <div ref={titleRef} className="text-center mb-12">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 text-green-900">Supporting Our Farming Community</h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Sevanagala manages 4,215 hectares of cultivable land, with 3,311 hectares actively planted with sugarcane.
+          </p>
+          <div className="w-24 h-1 bg-green-600 mx-auto mt-4"></div>
+        </div>
+
+        <div ref={bannerRef} className="mb-12">
+          <Card className="bg-gradient-to-br from-green-600 to-emerald-700 text-white border-0 shadow-2xl">
+            <CardContent className="p-8">
+              <h3 className="text-2xl md:text-3xl font-bold mb-4 text-center">Our Commitment Goes Beyond Land Allocation</h3>
+              <p className="text-lg text-center leading-relaxed">
+                We work with settler farmers cultivating plots of 2-4 hectares under both irrigated and rain-fed conditions, 
+                ensuring quality cane supply and sustainable livelihoods for rural communities.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {supports.map((support, index) => (
+            <div
+              key={support.title}
+              onMouseEnter={handleCardHover}
+              onMouseLeave={handleCardHoverOut}
+              className="cursor-pointer"
+            >
+              <Card className="h-full border-2 border-green-100 shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <div 
+                    className={`support-icon-bg w-16 h-16 rounded-full bg-gradient-to-br ${support.gradient} flex items-center justify-center mx-auto mb-4`}
+                  >
+                    <support.icon className="support-icon w-8 h-8 text-white" />
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-green-900 mb-3">{support.title}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{support.description}</p>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

@@ -2,12 +2,13 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import axios from 'axios'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import BookingCalendar from '@/components/BookingCalendar'
+import SpecialBookingForm from '@/components/SpecialBookingForm'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,6 +34,27 @@ export default function BookingPage() {
   const [success, setSuccess] = useState(false)
   const [bookingRef, setBookingRef] = useState('')
   const [error, setError] = useState('')
+  
+  // Special booking states
+  const [isSpecialBooking, setIsSpecialBooking] = useState(false)
+  const [requestedCapacity, setRequestedCapacity] = useState(0)
+  const [specialReason, setSpecialReason] = useState('')
+  const [documents, setDocuments] = useState<any[]>([])
+
+  // Check if special booking is needed
+  const totalVisitors = formData.adults + formData.children
+  
+  useEffect(() => {
+    if (totalVisitors > 100) {
+      setIsSpecialBooking(true)
+      setRequestedCapacity(totalVisitors)
+    } else {
+      setIsSpecialBooking(false)
+      setRequestedCapacity(0)
+      setSpecialReason('')
+      setDocuments([])
+    }
+  }, [totalVisitors])
 
   const handleDateSelect = (date: string) => {
     setFormData({ ...formData, date, time_slot: '' })
@@ -55,23 +77,45 @@ export default function BookingPage() {
       return
     }
 
-    const totalVisitors = formData.adults + formData.children
-    if (totalVisitors > 30) {
-      setError('Maximum 30 visitors per booking. For larger groups, please contact us directly.')
-      return
+    // Validation for special bookings
+    if (isSpecialBooking) {
+      if (!specialReason || specialReason.trim().length < 50) {
+        setError('Please provide a detailed reason (minimum 50 characters) for your special request')
+        return
+      }
+      if (documents.length === 0) {
+        setError('Please upload at least one supporting document for special bookings')
+        return
+      }
     }
 
     setLoading(true)
 
     try {
-      const response = await axios.post('/api/bookings', {
+      const endpoint = isSpecialBooking ? '/api/bookings/special' : '/api/bookings'
+      
+      const bookingData = isSpecialBooking ? {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        visit_date: formData.date,
+        visit_time: formData.time_slot,
+        slot_id: selectedSlot?.id,
+        requested_capacity: requestedCapacity,
+        special_request_reason: specialReason,
+        documents: documents,
+        special_requests: formData.special_requirements
+      } : {
         ...formData,
         visitor_count: totalVisitors
-      })
-      setBookingRef(response.data.data.booking_reference)
+      }
+
+      const response = await axios.post(endpoint, bookingData)
+      
+      setBookingRef(response.data.booking?.booking_reference || response.data.data?.booking_reference)
       setSuccess(true)
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Booking failed. Please try again.')
+      setError(error.response?.data?.error || error.response?.data?.message || 'Booking failed. Please try again.')
       console.error('Booking error:', error)
     } finally {
       setLoading(false)
@@ -81,9 +125,15 @@ export default function BookingPage() {
   // Success/Confirmation Page
   if (success) {
     return (
-      <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-white to-amber-50 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 opacity-30 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-amber-200 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+      </div>
         <Header />
-        <main className="flex-1 container mx-auto px-4 sm:px-6 py-8 sm:py-16">
+        <main className="flex-1 container mx-auto px-4 sm:px-6 pt-24 pb-8 sm:pt-32 sm:pb-16">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -98,53 +148,67 @@ export default function BookingPage() {
                   transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                   className="text-center mb-6"
                 >
-                  <FaCheckCircle className="text-green-600 text-7xl mx-auto mb-4" />
-                  <h2 className="text-lg sm:text-xl md:text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Booking Confirmed!</h2>
-                  <p className="text-muted-foreground">Your free factory tour has been successfully reserved</p>
+                  <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 mb-4">
+                    <FaCheckCircle className="text-green-600 text-3xl sm:text-4xl" />
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-green-600 mb-2">
+                    {isSpecialBooking ? 'Special Request Submitted!' : 'Booking Confirmed!'}
+                  </h2>
+                  <p className="text-muted-foreground text-sm sm:text-base">
+                    {isSpecialBooking 
+                      ? 'Your special booking request has been received and is pending admin approval'
+                      : 'Your factory tour has been successfully reserved'}
+                  </p>
                 </motion.div>
-                
-                <div className="bg-primary/5 border-2 border-primary/20 rounded-lg p-6 mb-6">
-                  <p className="text-sm text-muted-foreground mb-2 text-center">Your Booking Reference Number:</p>
-                  <p className="text-xl sm:text-2xl md:text-3xl font-mono font-bold text-primary text-center tracking-wider">
-                    {bookingRef}
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    Please save this reference number for your records
-                  </p>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <FaUser className="mr-2" />
-                        Booking Details
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Name:</span>
-                        <span className="font-semibold">{formData.name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Phone:</span>
-                        <span className="font-semibold">{formData.phone}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Email:</span>
-                        <span className="font-semibold text-xs">{formData.email}</span>
-                      </div>
+                {isSpecialBooking && (
+                  <Card className="mb-6 border-amber-500 bg-amber-50">
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-2 flex items-center text-amber-900">
+                        <FaClock className="mr-2" />
+                        Pending Admin Approval
+                      </h3>
+                      <p className="text-sm text-amber-800">
+                        Your request for {requestedCapacity} visitors requires admin review. You will receive:
+                      </p>
+                      <ul className="text-sm text-amber-800 mt-2 ml-4 list-disc">
+                        <li>SMS notification when reviewed (24-48 hours)</li>
+                        <li>Email with approval status and details</li>
+                      </ul>
                     </CardContent>
                   </Card>
+                )}
 
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center">
-                        <FaCalendarCheck className="mr-2" />
-                        Tour Schedule
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2 text-sm">
+                <Card className="mb-6 bg-gradient-to-br from-primary/5 to-primary/10">
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-3 flex items-center">
+                      <FaCalendarCheck className="mr-2" />
+                      Your Booking Reference
+                    </h3>
+                    <div className="flex items-center justify-between bg-white p-3 rounded-lg border-2 border-dashed border-primary">
+                      <code className="text-lg sm:text-xl font-mono font-bold text-primary">
+                        {bookingRef}
+                      </code>
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => {
+                          navigator.clipboard.writeText(bookingRef)
+                          alert('Booking reference copied!')
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Save this reference number for your records
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  <Card className="border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg bg-white/80 backdrop-blur-sm">
+                    <CardContent className="p-4">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Date:</span>
                         <span className="font-semibold">{formData.date}</span>
@@ -180,36 +244,34 @@ export default function BookingPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="mb-6 border-primary/20">
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-3 flex items-center">
-                      <FaExclamationTriangle className="mr-2" />
-                      Important Reminders
-                    </h3>
-                    <ul className="text-sm text-muted-foreground space-y-2">
-                      <li className="flex items-start">
-                        <FaClock className="mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Please arrive <strong>15 minutes before</strong> your scheduled time</span>
-                      </li>
-                      <li className="flex items-start">
-                        <FaClipboardList className="mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Bring your <strong>booking reference number</strong></span>
-                      </li>
-                      <li className="flex items-start">
-                        <FaCheckCircle className="mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Wear <strong>comfortable closed-toe shoes</strong></span>
-                      </li>
-                      <li className="flex items-start">
-                        <FaInfoCircle className="mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Tours may be cancelled due to factory maintenance or holidays</span>
-                      </li>
-                      <li className="flex items-start">
-                        <FaGift className="mr-2 mt-0.5 flex-shrink-0" />
-                        <span>This is a <strong>FREE tour</strong> - no payment required</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
+                {!isSpecialBooking && (
+                  <Card className="mb-6 border-primary/20">
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-3 flex items-center">
+                        <FaExclamationTriangle className="mr-2" />
+                        Important Reminders
+                      </h3>
+                      <ul className="text-sm text-muted-foreground space-y-2">
+                        <li className="flex items-start">
+                          <FaClock className="mr-2 mt-0.5 flex-shrink-0" />
+                          <span>Please arrive <strong>15 minutes before</strong> your scheduled time</span>
+                        </li>
+                        <li className="flex items-start">
+                          <FaClipboardList className="mr-2 mt-0.5 flex-shrink-0" />
+                          <span>Bring your <strong>booking reference number</strong></span>
+                        </li>
+                        <li className="flex items-start">
+                          <FaCheckCircle className="mr-2 mt-0.5 flex-shrink-0" />
+                          <span>Wear <strong>comfortable closed-toe shoes</strong></span>
+                        </li>
+                        <li className="flex items-start">
+                          <FaInfoCircle className="mr-2 mt-0.5 flex-shrink-0" />
+                          <span>Tours may be cancelled due to factory maintenance or holidays</span>
+                        </li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Button 
@@ -249,418 +311,501 @@ export default function BookingPage() {
 
   // Main Booking Form Page
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-white to-amber-50 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 opacity-30 pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-200 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-amber-200 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+      </div>
       <Header />
       
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-7xl mx-auto"
-        >
-          {/* Header Section */}
-          <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="flex justify-center mb-4"
-            >
-              <GiSugarCane className="text-4xl sm:text-5xl md:text-6xl text-primary" />
-            </motion.div>
-            <h1 className="text-4xl sm:text-4xl md:text-5xl font-bold mb-3">Book Your FREE Factory Tour</h1>
-            <p className="text-xl text-muted-foreground mb-2">
-              Experience the fascinating journey from sugarcane to sugar
+      <main className="flex-1 pt-24 pb-8 sm:pt-32 sm:pb-16 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8 sm:mb-12"
+          >
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-emerald-600 via-green-700 to-amber-600 bg-clip-text text-transparent drop-shadow-sm">
+              Book Your Factory Tour
+            </h1>
+            <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
+              Experience the journey from farm to factory
             </p>
-            <div className="inline-block bg-primary/10 border border-primary/20 rounded-full px-6 py-2 mt-2">
-              <p className="font-semibold text-lg flex items-center justify-center gap-2">
-                <FaStar className="text-primary" />
-                Completely FREE - No Payment Required
-                <FaStar className="text-primary" />
-              </p>
-            </div>
-          </div>
-
+          </motion.div>
           {/* Tour Information Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card className="hover:shadow-md transition-shadow">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 sm:mb-12"
+          >
+            <Card className="group hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-emerald-100 hover:border-emerald-400 bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm">
               <CardContent className="p-6 text-center">
-                <FaClock className="text-lg sm:text-xl md:text-2xl sm:text-3xl md:text-4xl text-primary mx-auto mb-3" />
+                <div className="relative">
+                <div className="absolute inset-0 bg-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <FaClock className="relative text-5xl text-emerald-600 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              </div>
                 <h3 className="font-bold text-lg mb-2">Duration</h3>
                 <p className="text-muted-foreground">Approximately 2 hours</p>
                 <p className="text-sm text-muted-foreground mt-1">Guided factory tour</p>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="group hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-emerald-100 hover:border-emerald-400 bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm">
               <CardContent className="p-6 text-center">
-                <GiFactory className="text-lg sm:text-xl md:text-2xl sm:text-3xl md:text-4xl text-primary mx-auto mb-3" />
+                <div className="relative">
+                <div className="absolute inset-0 bg-green-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <GiFactory className="relative text-5xl text-green-600 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              </div>
                 <h3 className="font-bold text-lg mb-2">Tour Includes</h3>
-                <p className="text-muted-foreground">13 Interactive Stations</p>
+                <p className="text-muted-foreground">15 Interactive Stations</p>
                 <p className="text-sm text-muted-foreground mt-1">Full production process</p>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="group hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-emerald-100 hover:border-emerald-400 bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm">
               <CardContent className="p-6 text-center">
-                <FaMapMarkerAlt className="text-lg sm:text-xl md:text-2xl sm:text-3xl md:text-4xl text-primary mx-auto mb-3" />
+                <div className="relative">
+                <div className="absolute inset-0 bg-amber-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                <FaMapMarkerAlt className="relative text-5xl text-amber-600 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+              </div>
                 <h3 className="font-bold text-lg mb-2">Location</h3>
-                <p className="text-muted-foreground">Sewanagala Sugar Factory</p>
+                <p className="text-muted-foreground">Sevanagala Sugar Factory</p>
                 <p className="text-sm text-muted-foreground mt-1">Monaragala, Sri Lanka</p>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Calendar Section */}
-            <div>
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-2xl">
-                    <FaCalendarCheck className="mr-2" />
-                    Select Date & Time
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <BookingCalendar
-                    onDateSelect={handleDateSelect}
-                    onSlotSelect={handleSlotSelect}
-                    selectedDate={formData.date}
-                    selectedSlot={selectedSlot}
-                  />
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-2xl mx-auto mb-6"
+            >
+              <Card className="border-destructive">
+                <CardContent className="p-4">
+                  <p className="text-destructive flex items-center">
+                    <FaExclamationTriangle className="mr-2 flex-shrink-0" />
+                    {error}
+                  </p>
                 </CardContent>
               </Card>
+            </motion.div>
+          )}
+
+          <div className="grid lg:grid-cols-5 gap-6 lg:gap-8 mb-8 lg:mb-12">
+            {/* Left Column - Calendar */}
+            <div className="lg:col-span-3">
+              <div className="sticky top-24">
+              <BookingCalendar 
+                onDateSelect={handleDateSelect}
+                onSlotSelect={handleSlotSelect}
+                selectedDate={formData.date}
+                selectedSlot={selectedSlot}
+              />
+              </div>
             </div>
 
-            {/* Booking Form Section */}
-            <div className="space-y-4 sm:space-y-6">
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-2xl">
-                    <FaUser className="mr-2" />
-                    Your Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg flex items-start"
-                      >
-                        <FaExclamationTriangle className="mr-2 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm">{error}</span>
-                      </motion.div>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          <FaUser className="inline mr-2 text-primary" />
-                          Full Name *
-                        </label>
-                        <Input
-                          required
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="John Doe"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          <FaPhone className="inline mr-2 text-primary" />
-                          Phone Number *
-                        </label>
-                        <Input
-                          required
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          placeholder="0771234567"
-                        />
-                      </div>
+            {/* Right Column - Booking Form */}
+            <div className="lg:col-span-2">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Decorative form header */}
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-100 to-green-100 rounded-full mb-2">
+                    <GiSugarCane className="text-emerald-600 text-xl" />
+                    <span className="text-sm font-semibold text-emerald-800">Complete Your Booking</span>
+                  </div>
+                </div>
+                {/* Personal Information */}
+                <Card className="border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg bg-white/80 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg font-bold bg-gradient-to-r from-emerald-700 to-green-700 bg-clip-text text-transparent">
+                      <FaUser className="mr-2" />
+                      Personal Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Full Name <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="John Doe"
+                        required
+                      />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        <FaEnvelope className="inline mr-2 text-primary" />
-                        Email Address *
+                        Email <span className="text-destructive">*</span>
                       </label>
                       <Input
-                        required
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="john@example.com"
+                        required
                       />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          <FaUsers className="inline mr-2 text-primary" />
-                          Adults *
-                        </label>
-                        <Input
-                          required
-                          type="number"
-                          min="1"
-                          max="30"
-                          value={formData.adults}
-                          onChange={(e) => setFormData({ ...formData, adults: parseInt(e.target.value) || 1 })}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          <FaUsers className="inline mr-2 text-primary" />
-                          Children
-                        </label>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="30"
-                          value={formData.children}
-                          onChange={(e) => setFormData({ ...formData, children: parseInt(e.target.value) || 0 })}
-                        />
-                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        <FaInfoCircle className="inline mr-2 text-primary" />
-                        Special Requirements (Optional)
+                        Phone <span className="text-destructive">*</span>
                       </label>
-                      <textarea
-                        value={formData.special_requirements}
-                        onChange={(e) => setFormData({ ...formData, special_requirements: e.target.value })}
-                        placeholder="Any accessibility needs, dietary restrictions, or special requests..."
-                        rows={3}
-                        className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                      <Input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+94 77 123 4567"
+                        required
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Group Size */}
+                <Card className="border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg bg-white/80 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg font-bold bg-gradient-to-r from-emerald-700 to-green-700 bg-clip-text text-transparent">
+                      <FaUsers className="mr-2" />
+                      Group Size
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Adults (13+ years)
+                      </label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="1000"
+                        value={formData.adults}
+                        onChange={(e) => setFormData({ ...formData, adults: parseInt(e.target.value) || 1 })}
+                        required
                       />
                     </div>
 
-                    {selectedSlot && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                      >
-                        <Card className="border-primary/20">
-                          <CardContent className="p-4">
-                            <h4 className="font-semibold mb-3 flex items-center">
-                              <FaCheckCircle className="mr-2 text-green-600" />
-                              Selected Time Slot
-                            </h4>
-                            <div className="space-y-2 text-sm text-muted-foreground">
-                              <p className="flex items-center">
-                                <FaCalendarAlt className="mr-2 flex-shrink-0" />
-                                <strong className="mr-1">Date:</strong> {formData.date}
-                              </p>
-                              <p className="flex items-center">
-                                <MdAccessTime className="mr-2 flex-shrink-0" />
-                                <strong className="mr-1">Time:</strong> {formData.time_slot}
-                              </p>
-                              <p className="flex items-center">
-                                <MdPeople className="mr-2 flex-shrink-0" />
-                                <strong className="mr-1">Total Visitors:</strong> {formData.adults + formData.children} person(s)
-                              </p>
-                              <p className="flex items-center">
-                                <MdCheck className="mr-2 flex-shrink-0" />
-                                <strong className="mr-1">Available Spots:</strong> {selectedSlot.available_spots}
-                              </p>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    )}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Children (Under 13)
+                      </label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="1000"
+                        value={formData.children}
+                        onChange={(e) => setFormData({ ...formData, children: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
 
-                    <Card className="border-primary/20">
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm font-semibold">
+                        Total Visitors: {totalVisitors}
+                      </p>
+                      {totalVisitors > 100 && (
+                        <p className="text-xs text-amber-600 mt-1">
+                          ⚠️ Special approval required for groups over 100
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Special Booking Form - Shows when >100 visitors */}
+                {isSpecialBooking && (
+                  <SpecialBookingForm
+                    requestedCapacity={requestedCapacity}
+                    onCapacityChange={setRequestedCapacity}
+                    specialReason={specialReason}
+                    onReasonChange={setSpecialReason}
+                    documents={documents}
+                    onDocumentsChange={setDocuments}
+                  />
+                )}
+
+                {/* Special Requirements */}
+                <Card className="border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg bg-white/80 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-lg font-bold bg-gradient-to-r from-emerald-700 to-green-700 bg-clip-text text-transparent">
+                      <FaInfoCircle className="mr-2" />
+                      Special Requirements (Optional)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="relative z-10">
+                    <textarea
+                      className="w-full p-3 border rounded-lg resize-none"
+                      rows={3}
+                      value={formData.special_requirements}
+                      onChange={(e) => setFormData({ ...formData, special_requirements: e.target.value })}
+                      placeholder="Any special requirements or notes..."
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Selected Slot Summary */}
+                {selectedSlot && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                  >
+                    <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-md">
                       <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold text-lg">Tour Fee:</p>
-                            <p className="text-sm text-muted-foreground">No payment required</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center">
-                              <FaGift className="mr-2" />
-                              FREE
-                            </p>
-                            <p className="text-xs text-muted-foreground">Complimentary Tour</p>
-                          </div>
+                        <h4 className="font-semibold mb-3 flex items-center">
+                          <FaCheckCircle className="mr-2 text-green-600" />
+                          Selected Time Slot
+                        </h4>
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          <p className="flex items-center">
+                            <FaCalendarAlt className="mr-2 flex-shrink-0" />
+                            <strong className="mr-1">Date:</strong> {formData.date}
+                          </p>
+                          <p className="flex items-center">
+                            <MdAccessTime className="mr-2 flex-shrink-0" />
+                            <strong className="mr-1">Time:</strong> {formData.time_slot}
+                          </p>
+                          <p className="flex items-center">
+                            <MdPeople className="mr-2 flex-shrink-0" />
+                            <strong className="mr-1">Total Visitors:</strong> {totalVisitors} person(s)
+                          </p>
+                          <p className="flex items-center">
+                            <MdCheck className="mr-2 flex-shrink-0" />
+                            <strong className="mr-1">Available Spots:</strong> {selectedSlot.available_spots}
+                          </p>
                         </div>
                       </CardContent>
                     </Card>
+                  </motion.div>
+                )}
 
-                    <Card>
-                      <CardContent className="p-4">
-                        <label className="flex items-start cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.agree_terms}
-                            onChange={(e) => setFormData({ ...formData, agree_terms: e.target.checked })}
-                            className="mt-1 mr-3 h-4 w-4 rounded border-input"
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            I agree to the terms and conditions and understand that:
-                            <ul className="list-disc ml-5 mt-2 space-y-1 text-xs">
-                              <li>This is a free factory tour with no charges</li>
-                              <li>I will arrive 15 minutes before the scheduled time</li>
-                              <li>I will follow all safety guidelines during the tour</li>
-                              <li>Tours may be cancelled due to factory operations or holidays</li>
-                              <li>Photography may be restricted in certain areas</li>
-                            </ul>
-                          </span>
-                        </label>
-                      </CardContent>
-                    </Card>
+                {/* Terms */}
+                <Card className="border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-300 hover:shadow-lg bg-white/80 backdrop-blur-sm">
+                  <CardContent className="p-4">
+                    <label className="flex items-start cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={formData.agree_terms}
+                        onChange={(e) => setFormData({ ...formData, agree_terms: e.target.checked })}
+                        className="mt-1 mr-3 h-4 w-4 rounded border-input"
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        I agree to the terms and conditions and understand that:
+                        <ul className="list-disc ml-5 mt-2 space-y-1 text-xs">
+                          <li>I will arrive 15 minutes before the scheduled time</li>
+                          <li>I will follow all safety guidelines during the tour</li>
+                          <li>Tours may be cancelled due to factory operations or holidays</li>
+                          <li>Photography may be restricted in certain areas</li>
+                          {isSpecialBooking && (
+                            <li className="text-amber-600 font-semibold">
+                              This special booking requires admin approval (24-48 hours)
+                            </li>
+                          )}
+                        </ul>
+                      </span>
+                    </label>
+                  </CardContent>
+                </Card>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full text-lg py-6" 
-                      disabled={loading || !formData.date || !formData.time_slot || !formData.agree_terms}
-                      size="lg"
-                    >
-                      {loading ? (
-                        <>
-                          <FaClock className="mr-2 animate-spin" />
-                          Processing Your Booking...
-                        </>
-                      ) : (
-                        <>
-                          <FaCheckCircle className="mr-2" />
-                          Confirm FREE Booking
-                        </>
-                      )}
-                    </Button>
+                {/* Submit Button */}
+                <Button 
+                  type="submit" 
+                  className="w-full text-lg py-6 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300" 
+                  disabled={loading || !formData.date || !formData.time_slot || !formData.agree_terms}
+                  size="lg"
+                >
+                  {loading ? (
+                    <>
+                      <FaClock className="mr-2 animate-spin" />
+                      Processing Your Booking...
+                    </>
+                  ) : (
+                    <>
+                      <FaCheckCircle className="mr-2" />
+                      {isSpecialBooking ? 'Submit Special Request' : 'Confirm Booking'}
+                    </>
+                  )}
+                </Button>
 
-                    {!formData.date && (
-                      <p className="text-sm text-center text-muted-foreground">
-                        Please select a date and time slot from the calendar
-                      </p>
-                    )}
+                {!formData.date && (
+                  <p className="text-sm text-center text-muted-foreground">
+                    Please select a date and time slot from the calendar
+                  </p>
+                )}
 
-                    {!formData.agree_terms && formData.date && (
-                      <p className="text-sm text-center text-destructive">
-                        Please agree to the terms and conditions to proceed
-                      </p>
-                    )}
-                  </form>
-                </CardContent>
-              </Card>
-
-              {/* What to Expect Card */}
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-xl">
-                    <FaInfoCircle className="mr-2" />
-                    What to Expect
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start">
-                      <FaCheckCircle className="text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Guided tour through 13 interactive stations</span>
-                    </li>
-                    <li className="flex items-start">
-                      <FaCheckCircle className="text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Learn about sugar production from farm to factory</span>
-                    </li>
-                    <li className="flex items-start">
-                      <FaCheckCircle className="text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>See state-of-the-art processing equipment</span>
-                    </li>
-                    <li className="flex items-start">
-                      <FaCheckCircle className="text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Educational experience for all ages</span>
-                    </li>
-                    <li className="flex items-start">
-                      <FaCheckCircle className="text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Safety equipment provided if needed</span>
-                    </li>
-                    <li className="flex items-start">
-                      <FaCheckCircle className="text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Duration: Approximately 2 hours</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
+                {!formData.agree_terms && formData.date && (
+                  <p className="text-sm text-center text-destructive">
+                    Please agree to the terms and conditions
+                  </p>
+                )}
+              </form>
             </div>
           </div>
 
           {/* Important Information Section */}
-          <Card className="mt-8 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center text-2xl">
-                <FaExclamationTriangle className="mr-2" />
-                Important Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-8 lg:mt-12"
+          >
+            <Card className="shadow-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-white to-orange-50 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-200/20 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-200/20 rounded-full -ml-32 -mb-32 blur-3xl"></div>
+              <CardHeader>
+                <CardTitle className="flex items-center text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent relative z-10">
+                  <FaExclamationTriangle className="mr-2 text-amber-600" />
+                  Important Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative z-10 space-y-8">
+                {/* Before You Arrive */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3">Before You Arrive:</h3>
+                  <h3 className="font-bold text-xl mb-4 flex items-center text-amber-800">
+                    <FaInfoCircle className="mr-2 text-amber-600" />
+                    Before You Arrive
+                  </h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Wear comfortable closed-toe shoes (no sandals or flip-flops)</span>
+                      <span>Wear comfortable closed-toe shoes. Sandals or flip-flops are not permitted.</span>
                     </li>
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Dress appropriately for a factory environment</span>
+                      <span>Dress appropriately for an industrial factory environment.</span>
                     </li>
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Please ensure all adult visitors bring their NICs for verification.</span>
+                      <span>Bring your NIC or valid identification for verification.</span>
                     </li>
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Arrive 15 minutes early for check-in</span>
+                      <span>Arrive at least 15 minutes before the scheduled time for check-in.</span>
                     </li>
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Children under 12 must be accompanied by an adult</span>
+                      <span>Children under 12 years must be accompanied by an adult.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Visitors with medical conditions (such as respiratory, heart, or mobility-related conditions) should inform staff in advance.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Large bags or backpacks should be avoided, as storage facilities may be limited.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Certain areas of the factory may be hot, humid, or noisy. Outdoor sections may require sun protection.</span>
                     </li>
                   </ul>
                 </div>
+
+                {/* During the Tour */}
                 <div>
-                  <h3 className="font-semibold text-lg mb-3">During the Tour:</h3>
+                  <h3 className="font-bold text-xl mb-4 flex items-center text-amber-800">
+                    <FaExclamationTriangle className="mr-2 text-amber-600" />
+                    During the Tour
+                  </h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Follow all safety instructions from guides</span>
+                      <span>Follow all safety instructions provided by the tour guides at all times.</span>
                     </li>
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Stay with your group at all times</span>
+                      <span>Remain with your group and use designated walkways only.</span>
                     </li>
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Photography allowed in designated areas only</span>
+                      <span>Touching machinery, running, or engaging in unsafe behavior is strictly prohibited.</span>
                     </li>
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Food and drinks not permitted in production areas</span>
+                      <span>Photography and video recording are permitted only in designated areas.</span>
                     </li>
                     <li className="flex items-start">
                       <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Tours may be adjusted based on factory operations</span>
+                      <span>Mobile phone usage may be restricted in sensitive production areas.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Food, drinks, smoking, and vaping are not permitted within production zones.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Personal protective equipment provided by the factory must be worn where instructed.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>In the event of an emergency, follow instructions from factory staff immediately.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Tours may be modified, delayed, or cancelled due to operational or safety requirements.</span>
                     </li>
                   </ul>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+
+                {/* Additional Notices */}
+                <div>
+                  <h3 className="font-bold text-xl mb-4 flex items-center text-amber-800">
+                    <FaInfoCircle className="mr-2 text-amber-600" />
+                    Additional Notices
+                  </h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>School and institutional groups must be accompanied by responsible supervisors at all times.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Commercial photography, videography, or media visits require prior written approval.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Visitors participate in the tour at their own risk. The factory is not responsible for loss or damage to personal belongings.</span>
+                    </li>
+                    <li className="flex items-start">
+                      <FaCheckCircle className="text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Failure to comply with tour rules and safety guidelines may result in immediate termination of the tour without notice.</span>
+                    </li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+        </div>
       </main>
-      
+
       <Footer />
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

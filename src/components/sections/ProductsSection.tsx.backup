@@ -1,0 +1,222 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Package, Droplet, Zap, Leaf } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import WavePattern from '../backgrounds/WavePattern'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+export default function ProductsSection() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const titleRef = useRef<HTMLDivElement>(null)
+  const productsRef = useRef<HTMLDivElement>(null)
+
+  const products = [
+    {
+      icon: Package,
+      title: 'Natural Brown Sugar',
+      description: 'We produce Sri Lanka\'s finest natural brown sugar from the first crystallization of sugarcane. Free from additional dyes and chemicals, our raw sugar maintains its natural qualities and superior taste.',
+      stat: '8 tons',
+      statLabel: 'Per 100 tons of cane',
+      color: 'from-amber-500 to-yellow-600'
+    },
+    {
+      icon: Droplet,
+      title: 'Potable Alcohol (Ethyl)',
+      description: 'High-quality ethyl alcohol produced through advanced distillation processes, meeting international standards for purity and safety.',
+      color: 'from-blue-500 to-cyan-600'
+    },
+    {
+      icon: Zap,
+      title: 'Power Generation',
+      description: 'Sustainable energy production utilizing bagasse and other by-products, contributing to our environmental goals and energy independence.',
+      color: 'from-yellow-500 to-orange-600'
+    },
+    {
+      icon: Leaf,
+      title: 'Bio-Compost',
+      description: 'Organic fertilizer produced from agricultural by-products, supporting sustainable farming practices and soil health.',
+      color: 'from-green-500 to-emerald-600'
+    }
+  ]
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Title animation
+      gsap.from(titleRef.current?.children || [], {
+        y: 50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: titleRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Product cards with 3D flip effect
+      const productCards = productsRef.current?.children || []
+      gsap.from(productCards, {
+        y: 80,
+        opacity: 0,
+        rotationY: -90,
+        transformPerspective: 1000,
+        duration: 1,
+        stagger: 0.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: productsRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Animate icons inside cards
+      Array.from(productCards).forEach((card, index) => {
+        const icon = card.querySelector('.product-icon')
+        const iconBg = card.querySelector('.product-icon-bg')
+        
+        if (icon && iconBg) {
+          gsap.from(iconBg, {
+            scale: 0,
+            rotation: 180,
+            duration: 0.8,
+            delay: index * 0.2 + 0.3,
+            ease: 'back.out(1.7)',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          })
+
+          gsap.from(icon, {
+            scale: 0,
+            rotation: -180,
+            duration: 0.6,
+            delay: index * 0.2 + 0.5,
+            ease: 'back.out(2)',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          })
+        }
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  const handleCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget
+    const icon = card.querySelector('.product-icon')
+    const iconBg = card.querySelector('.product-icon-bg')
+    
+    gsap.to(card, {
+      y: -15,
+      scale: 1.03,
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+      duration: 0.4,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 360,
+      scale: 1.15,
+      duration: 0.6,
+      ease: 'power2.out'
+    })
+
+    gsap.to(icon, {
+      y: -5,
+      scale: 1.1,
+      duration: 0.3,
+      ease: 'back.out(1.7)'
+    })
+  }
+
+  const handleCardHoverOut = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget
+    const icon = card.querySelector('.product-icon')
+    const iconBg = card.querySelector('.product-icon-bg')
+    
+    gsap.to(card, {
+      y: 0,
+      scale: 1,
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      duration: 0.4,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 0,
+      scale: 1,
+      duration: 0.4,
+      ease: 'power2.out'
+    })
+
+    gsap.to(icon, {
+      y: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+  }
+
+  return (
+    <section ref={sectionRef} className="relative py-16 md:py-24 bg-gradient-to-b from-green-50 to-white overflow-hidden">
+      <WavePattern />
+      
+      <div className="container relative z-10 mx-auto px-4">
+        <div ref={titleRef} className="text-center mb-12">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 text-green-900">Our Products & Services</h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Beyond sugar, our extensive facility produces a diverse range of products, 
+            maximizing resource utilization and supporting sustainable operations.
+          </p>
+          <div className="w-24 h-1 bg-green-600 mx-auto mt-4"></div>
+        </div>
+
+        <div ref={productsRef} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {products.map((product, index) => (
+            <div
+              key={product.title}
+              onMouseEnter={handleCardHover}
+              onMouseLeave={handleCardHoverOut}
+              className="cursor-pointer"
+            >
+              <Card className="h-full border-2 border-green-100 overflow-hidden shadow-lg">
+                <CardContent className="p-6">
+                  <div 
+                    className={`product-icon-bg w-16 h-16 rounded-xl bg-gradient-to-br ${product.color} flex items-center justify-center mb-4`}
+                  >
+                    <product.icon className="product-icon w-8 h-8 text-white" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-green-900 mb-3">{product.title}</h3>
+                  <p className="text-gray-700 leading-relaxed mb-4">{product.description}</p>
+                  
+                  {product.stat && (
+                    <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-600">
+                      <p className="text-2xl font-bold text-green-900">{product.stat}</p>
+                      <p className="text-sm text-gray-600">{product.statLabel}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

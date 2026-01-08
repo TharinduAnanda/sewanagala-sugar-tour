@@ -2,11 +2,13 @@
 
 export const dynamic = 'force-dynamic'
 
-
-import { motion } from 'framer-motion'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Hero from '@/components/Hero'
+import ProductsSection from '@/components/sections/ProductsSection'
+import FarmingCommunitySection from '@/components/sections/FarmingCommunitySection'
+import ImpactSection from '@/components/sections/ImpactSection'
+import CSRSection from '@/components/sections/CSRSection'
 
 export default function Home() {
   return (
@@ -14,6 +16,10 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
+        <ProductsSection />
+        <FarmingCommunitySection />
+        <ImpactSection />
+        <CSRSection />
       </main>
       <Footer />
     </div>

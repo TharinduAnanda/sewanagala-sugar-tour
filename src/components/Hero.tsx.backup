@@ -1,0 +1,229 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { FaArrowRight } from 'react-icons/fa'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import SugarcanePattern from './backgrounds/SugarcanePattern'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+export default function Hero() {
+  const heroRef = useRef<HTMLElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  const subtitleRef = useRef<HTMLParagElement>(null)
+  const taglineRef = useRef<HTMLParagElement>(null)
+  const descRef = useRef<HTMLParagElement>(null)
+  const buttonsRef = useRef<HTMLDivElement>(null)
+  const statsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Image zoom effect
+      gsap.from('.hero-bg', {
+        scale: 1.2,
+        duration: 1.5,
+        ease: 'power2.out'
+      })
+
+      // Title animation - split and stagger
+      if (titleRef.current) {
+        const chars = titleRef.current.textContent?.split('') || []
+        titleRef.current.innerHTML = chars.map(char => 
+          char === ' ' ? '<span>&nbsp;</span>' : `<span class="inline-block">${char}</span>`
+        ).join('')
+        
+        gsap.from(titleRef.current.children, {
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.03,
+          ease: 'back.out(1.7)',
+          delay: 0.3
+        })
+      }
+
+      // Subtitle with bounce
+      gsap.from(subtitleRef.current, {
+        y: 30,
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.8,
+        delay: 0.8,
+        ease: 'elastic.out(1, 0.5)'
+      })
+
+      // Tagline with slide
+      gsap.from(taglineRef.current, {
+        y: 20,
+        opacity: 0,
+        duration: 0.6,
+        delay: 1,
+        ease: 'power3.out'
+      })
+
+      // Description fade
+      gsap.from(descRef.current, {
+        y: 20,
+        opacity: 0,
+        duration: 0.8,
+        delay: 1.2,
+        ease: 'power2.out'
+      })
+
+      // Buttons with stagger
+      gsap.from(buttonsRef.current?.children || [], {
+        y: 30,
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.6,
+        stagger: 0.15,
+        delay: 1.4,
+        ease: 'back.out(1.7)'
+      })
+
+      // Stats cards with stagger and rotation
+      gsap.from(statsRef.current?.children || [], {
+        y: 50,
+        opacity: 0,
+        rotationY: -90,
+        duration: 0.8,
+        stagger: 0.1,
+        delay: 1.6,
+        ease: 'power3.out'
+      })
+
+      // Parallax effect on scroll
+      gsap.to('.hero-bg', {
+        yPercent: 30,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1
+        }
+      })
+
+      // Fade out content on scroll
+      gsap.to('.hero-content', {
+        opacity: 0,
+        y: -50,
+        ease: 'power2.inOut',
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: 'top top',
+          end: '50% top',
+          scrub: 1
+        }
+      })
+    }, heroRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  const handleHover = (e: React.MouseEvent<HTMLDivElement>) => {
+    gsap.to(e.currentTarget, {
+      scale: 1.08,
+      y: -8,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+  }
+
+  const handleHoverOut = (e: React.MouseEvent<HTMLDivElement>) => {
+    gsap.to(e.currentTarget, {
+      scale: 1,
+      y: 0,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+  }
+
+  return (
+    <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
+      {/* Background with parallax */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/90 to-yellow-900/90 z-10" />
+        <div className="hero-bg w-full h-full bg-[url('/images/hero.jpg')] bg-cover bg-center" />
+        <SugarcanePattern />
+      </div>
+
+      <div className="container hero-content relative z-20 mx-auto px-4 text-center text-white">
+        <div>
+          <h1 ref={titleRef} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4">
+            Sevanagala Sugar Factory
+          </h1>
+          
+          <p ref={subtitleRef} className="text-2xl sm:text-3xl md:text-4xl mb-4 font-semibold text-yellow-300">
+            Producing Best Quality Natural Brown Sugar
+          </p>
+          
+          <p ref={taglineRef} className="text-xl sm:text-2xl mb-2 text-green-200">
+            Since 1986
+          </p>
+          
+          <p ref={descRef} className="text-lg sm:text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
+            Experience the journey from farm to factory. Discover how sugar is made at Sri Lanka's premier sugar production facility.
+          </p>
+          
+          <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Link href="/tour">
+              <Button size="lg" className="w-full sm:w-auto bg-white text-black hover:bg-gray-100">
+                Start Virtual Tour
+                <FaArrowRight className="ml-2" />
+              </Button>
+            </Link>
+            <Link href="/booking">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent text-white border-white hover:bg-white/10">
+                Book Physical Tour
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        <div ref={statsRef} className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div 
+            className="stat-card bg-white/10 backdrop-blur-sm rounded-lg p-6 transition-all duration-300 cursor-pointer"
+            onMouseEnter={handleHover}
+            onMouseLeave={handleHoverOut}
+          >
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">1,250 TCD</h3>
+            <p className="text-base sm:text-lg">Production Capacity</p>
+          </div>
+          
+          <div 
+            className="stat-card bg-white/10 backdrop-blur-sm rounded-lg p-6 transition-all duration-300 cursor-pointer"
+            onMouseEnter={handleHover}
+            onMouseLeave={handleHoverOut}
+          >
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">38+ Years</h3>
+            <p className="text-base sm:text-lg">Of Excellence</p>
+          </div>
+          
+          <div 
+            className="stat-card bg-white/10 backdrop-blur-sm rounded-lg p-6 transition-all duration-300 cursor-pointer"
+            onMouseEnter={handleHover}
+            onMouseLeave={handleHoverOut}
+          >
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">25,000+</h3>
+            <p className="text-base sm:text-lg">Families Supported</p>
+          </div>
+          
+          <div 
+            className="stat-card bg-white/10 backdrop-blur-sm rounded-lg p-6 transition-all duration-300 cursor-pointer"
+            onMouseEnter={handleHover}
+            onMouseLeave={handleHoverOut}
+          >
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">100%</h3>
+            <p className="text-base sm:text-lg">Natural & Pure</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}

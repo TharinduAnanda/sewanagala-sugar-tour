@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      message: 'Booking confirmed successfully! Your FREE tour has been automatically confirmed. Confirmation email and SMS will be sent shortly.',
+      message: 'Booking confirmed successfully! Your tour has been automatically confirmed. Confirmation email and SMS will be sent shortly.',
       data: {
         id: insertResult.insertId,
         booking_reference: booking_id,

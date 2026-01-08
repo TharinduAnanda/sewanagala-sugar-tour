@@ -1,0 +1,317 @@
+'use client'
+
+export const dynamic = 'force-dynamic'
+
+import { useEffect, useRef } from 'react'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import AboutSection from '@/components/sections/AboutSection'
+import OurStorySection from '@/components/sections/OurStorySection'
+import { Card, CardContent } from '@/components/ui/card'
+import { TrendingUp, Users, Award } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { FaArrowRight } from 'react-icons/fa'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+export default function AboutPage() {
+  const processRef = useRef<HTMLDivElement>(null)
+  const valuesRef = useRef<HTMLDivElement>(null)
+  const ctaRef = useRef<HTMLElement>(null)
+
+  const values = [
+    {
+      icon: TrendingUp,
+      title: 'Economic Development',
+      description: 'We believe Sri Lanka has tremendous potential to develop its rural economy, eradicate poverty, and eliminate rural unemployment through sound agricultural policies and sustainable practices.',
+      gradient: 'from-green-500 to-emerald-600'
+    },
+    {
+      icon: Users,
+      title: 'People-Centered Approach',
+      description: 'Lanka Sugar Company Limited – Sevanagala (LSCLS) values every employee from bottom to top, appreciating constructive approaches and positive thinking that drive our success.',
+      gradient: 'from-blue-500 to-indigo-600'
+    },
+    {
+      icon: Award,
+      title: 'Dynamic Leadership',
+      description: 'Our leadership team thinks, plans, and acts with the prosperity of Sri Lanka\'s agrarian economy at the forefront of every decision.',
+      gradient: 'from-purple-500 to-pink-600'
+    }
+  ]
+
+  const processSteps = [
+    {
+      number: '01',
+      title: 'Fresh Cane Processing',
+      description: 'We process fresh, clean cane within 24 hours of harvesting to maximize sugar recovery'
+    },
+    {
+      number: '02',
+      title: 'Juice Extraction',
+      description: 'Our mill extracts juice efficiently using modern crushing technology'
+    },
+    {
+      number: '03',
+      title: 'First Crystallization',
+      description: 'Sugar crystals are recovered through first crystallization, producing natural brown sugar'
+    },
+    {
+      number: '04',
+      title: 'Quality Assurance',
+      description: 'Continuous improvement and modern processing techniques ensure industry-leading standards'
+    }
+  ]
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Process steps with stagger
+      const processCards = processRef.current?.children || []
+      gsap.from(processCards, {
+        y: 60,
+        opacity: 0,
+        scale: 0.8,
+        rotation: -10,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'back.out(1.7)',
+        scrollTrigger: {
+          trigger: processRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // Values cards with flip
+      const valueCards = valuesRef.current?.children || []
+      gsap.from(valueCards, {
+        y: 80,
+        opacity: 0,
+        rotationY: -90,
+        transformPerspective: 1000,
+        duration: 1,
+        stagger: 0.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: valuesRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+
+      // CTA section
+      gsap.from(ctaRef.current?.children || [], {
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: ctaRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      })
+    })
+
+    return () => ctx.revert()
+  }, [])
+
+  const handleCardHover = (e: React.MouseEvent) => {
+    const icon = e.currentTarget.querySelector('.value-icon')
+    const iconBg = e.currentTarget.querySelector('.value-icon-bg')
+    
+    gsap.to(e.currentTarget, {
+      y: -10,
+      scale: 1.03,
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 360,
+      scale: 1.2,
+      duration: 0.6,
+      ease: 'elastic.out(1, 0.5)'
+    })
+
+    gsap.to(icon, {
+      scale: 1.1,
+      duration: 0.3,
+      ease: 'back.out(2)'
+    })
+  }
+
+  const handleCardHoverOut = (e: React.MouseEvent) => {
+    const icon = e.currentTarget.querySelector('.value-icon')
+    const iconBg = e.currentTarget.querySelector('.value-icon-bg')
+    
+    gsap.to(e.currentTarget, {
+      y: 0,
+      scale: 1,
+      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(iconBg, {
+      rotation: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+
+    gsap.to(icon, {
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out'
+    })
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col bg-white">
+      <Header />
+      
+      <main className="flex-1">
+        <AboutSection />
+        <OurStorySection />
+
+        {/* Production Process - Enhanced with home page style */}
+        <section className="relative py-20 md:py-32 bg-gradient-to-b from-white via-green-50/30 to-white overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-20 left-10 w-96 h-96 bg-green-500 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-500 rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-green-900">
+                Our Production Process
+              </h2>
+              <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto mb-4">
+                Quality begins in the field. Our factory's performance is measured by overall recovery from available 
+                sugar in the cane, and we maintain industry-leading standards.
+              </p>
+              <div className="h-1 w-24 bg-gradient-to-r from-green-600 to-emerald-600 mx-auto rounded-full"></div>
+            </div>
+
+            <div ref={processRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-7xl mx-auto">
+              {processSteps.map((step) => (
+                <Card key={step.number} className="group h-full border-0 shadow-xl bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2">
+                  <CardContent className="p-8">
+                    <div className="text-7xl font-bold bg-gradient-to-br from-green-600/20 to-emerald-600/20 bg-clip-text text-transparent mb-4">
+                      {step.number}
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-bold text-green-900 mb-3 group-hover:text-green-700 transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">{step.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Vision & Values - Enhanced with home page style */}
+        <section className="relative py-20 md:py-32 bg-gradient-to-b from-green-50/30 via-white to-green-50/30 overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-1/4 right-20 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-1/4 left-20 w-96 h-96 bg-purple-500 rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-green-900">
+                Our Vision & Values
+              </h2>
+              <p className="text-xl text-gray-700 max-w-2xl mx-auto mb-4">
+                Guided by principles of sustainability, community empowerment, and agricultural excellence
+              </p>
+              <div className="h-1 w-24 bg-gradient-to-r from-green-600 to-emerald-600 mx-auto rounded-full"></div>
+            </div>
+
+            <div ref={valuesRef} className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+              {values.map((value) => (
+                <div
+                  key={value.title}
+                  onMouseEnter={handleCardHover}
+                  onMouseLeave={handleCardHoverOut}
+                  className="cursor-pointer"
+                >
+                  <Card className="h-full border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden">
+                    <CardContent className="p-8 lg:p-10">
+                      <div 
+                        className={`value-icon-bg w-20 h-20 rounded-full bg-gradient-to-br ${value.gradient} flex items-center justify-center mx-auto mb-6 shadow-lg`}
+                      >
+                        <value.icon className="value-icon w-10 h-10 text-white" />
+                      </div>
+                      
+                      <h3 className="text-2xl md:text-3xl font-bold text-green-900 mb-4 text-center">
+                        {value.title}
+                      </h3>
+                      <p className="text-gray-700 text-lg leading-relaxed text-center">
+                        {value.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section - Enhanced with home page style */}
+        <section ref={ctaRef} className="relative py-20 md:py-32 bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-96 h-96 bg-amber-500 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-green-500 rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center text-white">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                Experience Our Factory Tour
+              </h2>
+              <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-green-100">
+                See firsthand how sugar is made. Our guided tours provide an educational and engaging 
+                experience for visitors of all ages.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/tour">
+                  <Button 
+                    size="lg" 
+                    className="w-full sm:w-auto text-base md:text-lg px-8 py-6 rounded-lg bg-white text-green-900 hover:bg-amber-50 hover:scale-105 transition-all duration-300 shadow-xl"
+                  >
+                    Start Virtual Tour
+                    <FaArrowRight className="ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/booking">
+                  <Button 
+                    size="lg" 
+                    className="w-full sm:w-auto text-base md:text-lg px-8 py-6 rounded-lg bg-transparent text-white border-2 border-amber-400 hover:bg-amber-600/20 hover:border-amber-300 hover:scale-105 transition-all duration-300"
+                  >
+                    Book Physical Tour
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      
+      <Footer />
+    </div>
+  )
+}
